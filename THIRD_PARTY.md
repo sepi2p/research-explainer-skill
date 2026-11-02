@@ -1,4 +1,11 @@
-# Third-party components
+# Licences in this repository
+
+The MIT licence in [LICENSE](LICENSE) covers everything in this repository except the third-party components listed
+below, which keep their own licences (each folder carries its licence file). In particular, `skills/manimgl-best-practices`
+is CC BY-NC-SA 4.0: non-commercial use only, attribution required, adaptations under the same licence. Skip it with
+`install.sh --no-gl`; the research-explainer pipeline does not need it.
+
+## Third-party components
 
 | component | path | licence | origin |
 |---|---|---|---|

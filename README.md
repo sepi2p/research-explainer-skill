@@ -133,4 +133,5 @@ install.sh, AGENTS.md           installation for people and for agents
   read the claims ledger before you share it.
 
 ## Licence
-MIT for the skill and the example. Bundled skills and fonts keep their licences: see [THIRD_PARTY.md](THIRD_PARTY.md).
+MIT ([LICENSE](LICENSE)) for everything except the bundled third-party skills and fonts, which keep their own licences:
+see [THIRD_PARTY.md](THIRD_PARTY.md). One of them, the optional `manimgl-best-practices`, is non-commercial (CC BY-NC-SA 4.0).

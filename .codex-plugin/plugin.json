@@ -6,6 +6,6 @@
   "author": { "name": "sepi2p" },
   "homepage": "https://github.com/sepi2p/research-explainer-skill",
   "repository": "https://github.com/sepi2p/research-explainer-skill",
-  "license": "MIT",
+  "license": "MIT AND CC-BY-NC-SA-4.0 AND OFL-1.1",
   "keywords": ["manim", "3blue1brown", "explainer", "video", "research", "persian", "farsi", "slides"]
 }

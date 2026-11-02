@@ -3,6 +3,11 @@
 Newest first. Agents: read this after an update to learn new commands; every feature lands here and in SKILL.md in the
 same commit.
 
+## Unreleased
+- LICENSE is now the plain MIT text, so GitHub detects it as MIT. The scope statement (MIT for this repository's own
+  files; bundled skills and fonts under their own licences, manimgl-best-practices non-commercial) moved to
+  THIRD_PARTY.md and the READMEs. Plugin manifests list all licences: `MIT AND CC-BY-NC-SA-4.0 AND OFL-1.1`.
+
 ## 0.2.0 (2026-11-02)
 - Codex and ChatGPT: OpenAI plugin manifest (`.codex-plugin/plugin.json`), marketplace (`.agents/plugins/marketplace.json`),
   skill metadata (`skills/research-explainer/agents/openai.yaml`). `install.sh --codex` copies the skills to `~/.agents/skills`.
