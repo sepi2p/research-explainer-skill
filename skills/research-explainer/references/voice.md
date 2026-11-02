@@ -5,7 +5,7 @@ Set in project.json -> "voice": {"mode": ...}; override per build with `--voice`
 | mode | cost | quality | notes |
 |---|---|---|---|
 | none | free | n/a | text only; captions paced for reading; quiet generated music (-20 LUFS); `--no-music` for silence |
-| piper | free, offline | English good; Persian robotic | voices download on first use to ~/.local/share/piper-voices; set names in "piper": {"en": ..., "fa": ...} |
+| piper | free, offline | English good; Persian: play a sample first | voices download on first use to ~/.local/share/piper-voices; set names in "piper": {"en": ..., "fa": ...} |
 | manual | free | as good as the recording | `rx.py voice-script <lang>` writes the script; put one file per beat in voice/manual_<lang>/<scene>_<beat>.mp3 |
 | openai | paid, per use | best (English and Persian) | default model gpt-audio-1.5, voice marin; key in ~/.config/openai/key or $OPENAI_API_KEY |
 

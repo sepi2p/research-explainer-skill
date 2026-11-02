@@ -36,7 +36,7 @@ follow-ups: [references/intake.md](references/intake.md).
 3. **Language.** English, Persian, or both (each language is a full render; Persian text is right-to-left with Persian digits).
 4. **Voice.**
    - none: text only, captions paced for reading (about 12 characters/s Persian, 15 English); quiet music; free
-   - free: Piper, offline. Good in English; Persian is understandable but robotic
+   - free: Piper, offline. Good in English; Persian quality varies, so play a sample first
    - own recordings: the user records one clip per beat (or uses a web TTS) from a script we generate; free
    - paid: OpenAI voice (default gpt-audio-1.5, voice marin), billed by OpenAI per use (check their current pricing). Needs an API key
      in `~/.config/openai/key` or `$OPENAI_API_KEY`. **Never ask the user to paste a key into the chat**; tell them where to

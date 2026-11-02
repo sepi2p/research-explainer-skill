@@ -1,7 +1,7 @@
 """Narration voices. Each backend turns every beat's "say" text into a wav and returns its length.
 
   none    no voice (text-only video; beat lengths come from reading time, see rx.py durations)
-  piper   free, offline (Piper TTS). English voices are good; Persian voices are understandable but robotic.
+  piper   free, offline (Piper TTS). English voices are good; listen to a Persian sample before using it.
   manual  you supply one mp3/wav per beat in voice/manual_<lang>/<scene>_<beat>.mp3 (e.g. from a web TTS or your own voice)
   openai  paid; needs an OpenAI API key in $OPENAI_API_KEY or ~/.config/openai/key (never printed). Every clip is
           transcribed back and compared with its text; mismatches are regenerated.
