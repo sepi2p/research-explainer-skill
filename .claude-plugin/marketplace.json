@@ -1,0 +1,12 @@
+{
+  "name": "research-explainer-skill",
+  "owner": { "name": "sepi2p" },
+  "description": "3Blue1Brown-style research explainer videos and slides (English and Persian), with bundled Manim skills",
+  "plugins": [
+    {
+      "name": "research-explainer",
+      "source": "./",
+      "description": "research-explainer, manim-composer, manimce-best-practices, manimgl-best-practices"
+    }
+  ]
+}

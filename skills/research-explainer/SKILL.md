@@ -18,12 +18,14 @@ Bundled companions (install.sh puts them next to this skill): `manim-composer` (
 (Manim CE code), `manimgl-best-practices` (only if the user wants ManimGL). Read them when planning and coding scenes.
 
 Everything below happens in a **project folder** (one per video). `scripts/rx.py` runs the pipeline; run it from the
-project folder: `python3 <skill>/scripts/rx.py <command>`.
+project folder: `python3 ${CLAUDE_SKILL_DIR}/scripts/rx.py <command>` (written `rx.py` below). `${CLAUDE_SKILL_DIR}` is the
+folder that contains this SKILL.md; if your agent does not substitute it, use that folder's path.
 
 ## 0. Setup check (first time only)
 
-Run `rx.py check`. Required: manim, ffmpeg, fonts Inter + Vazirmatn. Optional: LaTeX, piper, OpenAI key, GPU. If something
-is missing, show the user the one-line fix it prints; `install.sh` in the repo installs fonts and skills.
+Run `rx.py check`. Required: manim, ffmpeg, fonts Inter + Vazirmatn. Optional: LaTeX, piper, OpenAI key, GPU. If fonts
+are missing, run `rx.py fonts` (installs the bundled fonts for this user). For other missing tools show the user the one-line
+fix it prints (system packages need their consent); the repo's AGENTS.md has the full install steps.
 
 ## 1. Intake: ask before doing anything
 

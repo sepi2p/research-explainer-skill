@@ -4,11 +4,12 @@
 #   ./install.sh --project  copy into ./.claude/skills of the current folder (this project only)
 #   ./install.sh --link     symlink instead of copy (for editing the skill)
 #   ./install.sh --no-gl    skip manimgl-best-practices (CC BY-NC-SA, only needed for ManimGL)
+#   ./install.sh --codex    install into ~/.agents/skills (OpenAI Codex; untested)
 set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DEST="$HOME/.claude/skills"; MODE=copy; GL=1
 for a in "$@"; do case "$a" in
-  --project) DEST="$PWD/.claude/skills";; --link) MODE=link;; --no-gl) GL=0;;
+  --project) DEST="$PWD/.claude/skills";; --codex) DEST="$HOME/.agents/skills";; --link) MODE=link;; --no-gl) GL=0;;
   *) echo "unknown option $a"; exit 1;; esac; done
 mkdir -p "$DEST"
 for s in research-explainer manim-composer manimce-best-practices manimgl-best-practices; do

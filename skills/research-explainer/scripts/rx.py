@@ -2,6 +2,7 @@
 """rx: build research explainer videos from a project folder (see SKILL.md).
 
   rx.py check                               tools, fonts, voices, GPU, API key present (never printed)
+  rx.py fonts                               install the bundled Inter and Vazirmatn fonts for this user
   rx.py new <dir> [--title T] [--langs en,fa] [--voice none|piper|manual|openai]
   rx.py claims                              every number in the narration must be in claims.json or assets/data.json
   rx.py assets                              every file in assets/ is registered in assets/manifest.json, hashes match
@@ -84,12 +85,12 @@ def cmd_check(a):
     def line(name, good, detail=""):
         nonlocal ok
         ok &= bool(good) or name.startswith("(optional)")
-        print(f"[{'ok' if good else '--'}] {name} {detail}")
+        print(f"[{'ok' if good else '--'}] {name} " + (detail if (not good or name.startswith("(optional) GPU")) else ""))
     line("manim", shutil.which("manim") or (pathlib.Path.home() / ".local/bin/manim").exists(), "(uv tool install manim)")
     line("ffmpeg/ffprobe", shutil.which("ffmpeg") and shutil.which("ffprobe"), "(apt install ffmpeg)")
     fc = sh("fc-list", capture_output=True, text=True).stdout if shutil.which("fc-list") else ""
     for f in ("Inter", "Vazirmatn"):
-        line(f"font {f}", f in fc, f"(run install.sh, or copy {SKILL}/assets/fonts/* to ~/.local/share/fonts && fc-cache -f)")
+        line(f"font {f}", f in fc, "(run: rx.py fonts)")
     line("(optional) LaTeX for MathTex", shutil.which("latex"), "(apt install texlive-latex-extra; else use Text for formulas)")
     line("(optional) piper (free voice)", shutil.which("piper") or (pathlib.Path.home() / ".local/bin/piper").exists(), "(uv tool install piper-tts)")
     key = os.environ.get("OPENAI_API_KEY") or (pathlib.Path.home() / ".config/openai/key").exists()
@@ -98,6 +99,19 @@ def cmd_check(a):
     line("(optional) GPU for experiments", gpu, gpu or "")
     print("ready" if ok else "missing required tools above")
     return 0 if ok else 1
+
+
+def cmd_fonts(a):
+    import platform
+    dest = pathlib.Path.home() / ("Library/Fonts" if platform.system() == "Darwin" else ".local/share/fonts/research-explainer")
+    dest.mkdir(parents=True, exist_ok=True)
+    n = 0
+    for f in (SKILL / "assets" / "fonts").iterdir():
+        if f.suffix in (".ttf", ".otf"):
+            shutil.copy2(f, dest / f.name); n += 1
+    if shutil.which("fc-cache"):
+        sh(["fc-cache", "-f"], capture_output=True)
+    print(f"installed {n} font files into {dest}")
 
 
 # ---------------- new ----------------
@@ -497,7 +511,7 @@ def cmd_build(a):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("check")
+    sub.add_parser("check"); sub.add_parser("fonts")
     p = sub.add_parser("new"); p.add_argument("dir"); p.add_argument("--title"); p.add_argument("--langs", default="en")
     p.add_argument("--voice", default="none", choices=["none", "piper", "manual", "openai"])
     sub.add_parser("claims"); sub.add_parser("assets")
@@ -511,7 +525,7 @@ def main():
         p.add_argument("--only", nargs="*", help="durations: force these beats (scene:i) to be voiced again")
         p.add_argument("--frames", type=int, default=9)
     a = ap.parse_args()
-    fn = {"check": cmd_check, "new": cmd_new, "claims": cmd_claims, "assets": cmd_assets, "asset-add": cmd_asset_add,
+    fn = {"check": cmd_check, "fonts": cmd_fonts, "new": cmd_new, "claims": cmd_claims, "assets": cmd_assets, "asset-add": cmd_asset_add,
           "strings": cmd_strings, "voice-script": cmd_voice_script, "durations": cmd_durations, "assemble": cmd_assemble,
           "qc": cmd_qc, "build": cmd_build}.get(a.cmd)
     if a.cmd == "render":
