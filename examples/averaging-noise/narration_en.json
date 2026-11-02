@@ -1,0 +1,17 @@
+{"scenes": [
+ {"id": "s00_title", "beats": [{"say": "", "caption": "", "min_dur": 3.0}]},
+ {"id": "s01_noise", "beats": [
+  {"say": "Here is a small test image, and here is one noisy measurement of it.", "caption": "Here is a small test image, and here is one noisy measurement of it."},
+  {"say": "Every pixel value got random noise with a standard deviation of 0.25, on a scale from 0 to 1.", "caption": "Every pixel value got random noise with a standard deviation of 0.25, on a scale from 0 to 1."},
+  {"say": "If we can take many measurements, can we get the clean image back?", "caption": "If we can take many measurements, can we get the clean image back?"}]},
+ {"id": "s02_average", "beats": [
+  {"say": "Average 4 noisy copies, then 16, then 64.", "caption": "Average 4 noisy copies, then 16, then 64."},
+  {"say": "The bottom row shows what is left: the error, at its true scale. It fades as the copies add up.", "caption": "The bottom row shows what is left: the error, at its true scale. It fades as the copies add up."}]},
+ {"id": "s03_chart", "beats": [
+  {"say": "Measured over 20 trials, the error falls from 0.25 to 0.125, 0.0625, and 0.031.", "caption": "Measured over 20 trials, the error falls from 0.25 to 0.125, 0.0625, and 0.031."},
+  {"say": "That is the noise divided by the square root of the number of copies. Four times the copies, half the error.", "caption": "That is the noise divided by the square root of the number of copies. Four times the copies, half the error."}]},
+ {"id": "s04_limit", "beats": [
+  {"say": "But this only works when the noise in each copy is independent.", "caption": "But this only works when the noise in each copy is independent."},
+  {"say": "When copies share half their noise, correlation 0.5, the error stops near 0.18, even with 64 copies.", "caption": "When copies share half their noise, correlation 0.5, the error stops near 0.18, even with 64 copies."},
+  {"say": "The shared part never averages out. Its floor is 0.177, and averaging cannot go below it.", "caption": "The shared part never averages out. Its floor is 0.177, and averaging cannot go below it."}]}
+]}

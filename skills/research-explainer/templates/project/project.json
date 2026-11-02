@@ -1,0 +1,19 @@
+{
+  "title": "TITLE",
+  "languages": ["en"],
+  "source_type": "paper | papers | own work | mix",
+  "audience": "researchers in nearby fields",
+  "voice": {
+    "mode": "none",
+    "piper": {"en": "en_US-lessac-medium", "fa": "fa_IR-gyro-medium"},
+    "openai": {"model": "gpt-audio-1.5", "voice": "marin", "instructions": {}}
+  },
+  "reading_cps": {"en": 15, "fa": 12},
+  "keep_latin": [],
+  "pronounce": {"en": {}, "fa": {}},
+  "palette": {},
+  "scenes": [
+    {"id": "s00_title", "file": "scenes/main.py", "class": "S00Title"},
+    {"id": "s01_hook",  "file": "scenes/main.py", "class": "S01Hook"}
+  ]
+}

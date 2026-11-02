@@ -1,0 +1,22 @@
+{
+  "title": "Why averaging removes noise",
+  "slug": "averaging_noise",
+  "languages": ["en", "fa"],
+  "source_type": "own experiment",
+  "audience": "researchers outside signal processing",
+  "voice": {
+    "mode": "none",
+    "piper": {"en": "en_US-lessac-medium", "fa": "fa_IR-gyro-medium"},
+    "openai": {"model": "gpt-audio-1.5", "voice": "marin"}
+  },
+  "reading_cps": {"en": 15, "fa": 12},
+  "keep_latin": ["RMSE", "σ", "n"],
+  "pronounce": {"fa": {"RMSE": "آر ام اس ای"}},
+  "scenes": [
+    {"id": "s00_title",   "file": "scenes/demo.py", "class": "S00Title"},
+    {"id": "s01_noise",   "file": "scenes/demo.py", "class": "S01Noise"},
+    {"id": "s02_average", "file": "scenes/demo.py", "class": "S02Average"},
+    {"id": "s03_chart",   "file": "scenes/demo.py", "class": "S03Chart"},
+    {"id": "s04_limit",   "file": "scenes/demo.py", "class": "S04Limit"}
+  ]
+}

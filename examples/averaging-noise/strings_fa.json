@@ -1,0 +1,27 @@
+{
+ "exact": {
+  "Why averaging removes noise": "چرا میانگین‌گیری نویز را حذف می‌کند",
+  "a demo of the research-explainer skill": "نمونه‌ای از مهارت research-explainer",
+  "clean": "تمیز",
+  "one noisy copy": "یک نسخهٔ نویزی",
+  "noise σ = 0.25": "نویز σ = ۰٫۲۵",
+  "error (gain ×1)": "خطا (بدون بزرگ‌نمایی)",
+  "measured": "اندازه‌گیری‌شده",
+  "theory σ/√n": "نظریه σ/√n",
+  "error (RMSE) after averaging": "خطا (RMSE) پس از میانگین‌گیری",
+  "independent noise": "نویز مستقل",
+  "shared noise (correlation 0.5)": "نویز مشترک (همبستگی ۰٫۵)",
+  "final · our run, seed 0, 20 trials": "نهایی · اجرای ما، بذر ۰، ۲۰ آزمایش",
+  "source: experiments/averaging.py → assets/data.json": "منبع: experiments/averaging.py → assets/data.json"
+ },
+ "patterns": [
+  [
+   "n = (\\d+)",
+   "n = {0}"
+  ],
+  [
+   "floor ([\\d.]+)",
+   "کف {0}"
+  ]
+ ]
+}

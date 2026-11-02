@@ -1,0 +1,13 @@
+{
+  "claims": [
+    {"id": "c1", "statement": "Each noisy copy has independent Gaussian noise with standard deviation 0.25 per pixel value (values 0-1).",
+     "values": ["0.25"], "status": "final", "source": "experiments/averaging.py (SIGMA), assets/data.json sigma", "caveat": ""},
+    {"id": "c2", "statement": "Averaging n independent copies gives RMSE close to 0.25/sqrt(n): 0.125 at 4, 0.0625 at 16, 0.031 at 64.",
+     "values": [], "status": "final", "source": "assets/data.json independent vs theory (20 trials, seed 0)",
+     "caveat": "Holds for independent, zero-mean noise only."},
+    {"id": "c3", "statement": "With correlation 0.5 between copies, RMSE stays near 0.18 even at 64 copies; the floor is 0.25*sqrt(0.5) = 0.177.",
+     "values": [], "status": "final", "source": "assets/data.json correlated, correlated_floor", "caveat": "One correlation level tested."},
+    {"id": "c4", "statement": "Copies tested: 1, 4, 16, 64; 20 trials each.", "values": [], "status": "final", "source": "assets/data.json ns, trials", "caveat": ""}
+  ],
+  "ignore_numbers": []
+}

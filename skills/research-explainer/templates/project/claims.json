@@ -1,0 +1,7 @@
+{
+  "claims": [
+    {"id": "c1", "statement": "ONE SENTENCE, as the source states it", "values": [], "status": "final",
+     "source": "paper.pdf p.X Table Y / results/file.csv / run id", "caveat": ""}
+  ],
+  "ignore_numbers": []
+}

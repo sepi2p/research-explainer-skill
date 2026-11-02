@@ -1,0 +1,94 @@
+{
+ "assets": [
+  {
+   "file": "avg_01.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "b7625366c538f4d5d82dcee46209bb5e89af1c7c9dbed503a549a1c6c827c601",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "avg_04.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "0a20eacdc895f0176ee6a468bbc37d8ca185c7efa26c4c61fdf3de5269c3144d",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "avg_16.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "8a0e720f7de38778e42c44eb56e028fd7567eed55dac7fcc33cbd1c099bbbf43",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "avg_64.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "b73785570ecb05675f151988daed6995889007a237cd2f4fc830cc1cdd95ca00",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "clean.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "76882e5eb4d7d2625ce89e8d78775d86c6e91176196d0c41d4069a16b2f92c0f",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "resid_01.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "859d5a8d6a54314c3069a4ecfb32afc0809c366d8235533a5eae10b925e77f19",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "resid_04.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "99167ea83aba3179631c275f759ad534f278b9c574142ce8d5e1755acbc6cabf",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "resid_16.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "d7f9d26683d9f1ec3d7c1add36b808cd6e8f8ad9cb46edaa3b28941abc4e179f",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "resid_64.png",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "c25bb7f30911d61f82a0888d41d91591663556b03c4682ebf69dc02b33140af1",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  },
+  {
+   "file": "data.json",
+   "kind": "measured",
+   "made_by": "experiments/averaging.py (seed 0)",
+   "note": "",
+   "sha256": "9e9e27849c13ea70d0543cb0d204d5bfc8f0b8fede17c1208941289bded07a9d",
+   "date": "2026-11-02T16:40:03+03:30",
+   "commit": null
+  }
+ ]
+}

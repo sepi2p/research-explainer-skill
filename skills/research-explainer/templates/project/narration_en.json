@@ -1,0 +1,6 @@
+{"scenes": [
+ {"id": "s00_title", "beats": [{"say": "", "caption": "", "min_dur": 3.0}]},
+ {"id": "s01_hook", "beats": [
+  {"say": "First sentence the narrator says.", "caption": "First sentence the narrator says.", "text": "Optional shorter caption for the text-only video."},
+  {"say": "Second beat.", "caption": "Second beat."}]}
+]}
