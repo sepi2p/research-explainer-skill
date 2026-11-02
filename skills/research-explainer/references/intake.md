@@ -28,3 +28,8 @@ Record answers in project.json.
 ## Defaults when the user doesn't care
 Researchers in nearby fields; 5-8 min per paper; English; text only (no cost); 720p; dark 3b1b palette; status tags on
 every result; a "limits" scene before the end.
+
+## Subtitles
+Ask once: subtitles as a separate .srt file (default: the whole frame stays picture; players and platforms show them on
+demand) or burned into the video (`"captions": "burn"`: a strip under the picture, and text-only beats last long enough
+to read). Visual storytelling is the default either way: plan the motion first.

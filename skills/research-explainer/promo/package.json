@@ -1,0 +1,7 @@
+{
+  "name": "rx-promo",
+  "private": true,
+  "type": "module",
+  "description": "Frame-exact capture of an HTML motion-graphics page (used by rx.py promo).",
+  "dependencies": { "playwright": "1.63.0" }
+}

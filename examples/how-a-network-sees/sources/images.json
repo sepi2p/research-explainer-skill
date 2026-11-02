@@ -1,0 +1,50 @@
+{
+ "cat": {
+  "title": "File:Young tabby cat keeping watch.jpg",
+  "licence": "CC0",
+  "author": "<a href=\"//commons.wikimedia.org/wiki/User:W.carter\" title=\"User:W.carter\">W.carter</a>",
+  "page": "https://commons.wikimedia.org/wiki/File:Young_tabby_cat_keeping_watch.jpg",
+  "file_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Young_tabby_cat_keeping_watch.jpg/960px-Young_tabby_cat_keeping_watch.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "sha256": "09c6f7fd7b6044e01c8339722f3010cb4f5751c82ab5891cde330bb3c666409f"
+ },
+ "cat2": {
+  "title": "File:Tabby Cat at a Cat Cafe (Taipei).jpg",
+  "licence": "CC0",
+  "author": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Battlesnake1&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Battlesnake1 (page does not exist)\">Battlesnake1</a>",
+  "page": "https://commons.wikimedia.org/wiki/File:Tabby_Cat_at_a_Cat_Cafe_(Taipei).jpg",
+  "file_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2b/Tabby_Cat_at_a_Cat_Cafe_%28Taipei%29.jpg/960px-Tabby_Cat_at_a_Cat_Cafe_%28Taipei%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "sha256": "a404b5ffef84748b3edc2a9ed42ed6ba17485d7726a7b699aba9c1b338bceca3"
+ },
+ "dog": {
+  "title": "File:Golden Retriever Chewing A Stick.jpg",
+  "licence": "CC0",
+  "author": "<a href=\"//commons.wikimedia.org/wiki/User:Cheetyuh\" title=\"User:Cheetyuh\">Cheetyuh</a>",
+  "page": "https://commons.wikimedia.org/wiki/File:Golden_Retriever_Chewing_A_Stick.jpg",
+  "file_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/Golden_Retriever_Chewing_A_Stick.jpg/960px-Golden_Retriever_Chewing_A_Stick.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "sha256": "2626bb59e091b15313ab7f86c9909e370aa0174f9759741ae1254db036d49f95"
+ },
+ "dog2": {
+  "title": "File:Charlie the Golden Retriever surrounded by daisies.png",
+  "licence": "CC0",
+  "author": "Unknown author<span style=\"display: none;\">Unknown author</span>",
+  "page": "https://commons.wikimedia.org/wiki/File:Charlie_the_Golden_Retriever_surrounded_by_daisies.png",
+  "file_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d8/Charlie_the_Golden_Retriever_surrounded_by_daisies.png/960px-Charlie_the_Golden_Retriever_surrounded_by_daisies.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "sha256": "7fc78b6e6623f0f852abe37b0da2b194239643596b07bf300cfb04adce937702"
+ },
+ "fish": {
+  "title": "File:Yatomi-Goldfish-1.jpg",
+  "licence": "CC0",
+  "author": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:Evelyn-rose&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:Evelyn-rose (page does not exist)\">Evelyn-rose</a>",
+  "page": "https://commons.wikimedia.org/wiki/File:Yatomi-Goldfish-1.jpg",
+  "file_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Yatomi-Goldfish-1.jpg/960px-Yatomi-Goldfish-1.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "sha256": "5105e096b9944a0d9c7f86df7b49a8a8a030cfb6dc93734e833b879a062de93c"
+ },
+ "fish2": {
+  "title": "File:Goldfish in the Cave.jpg",
+  "licence": "CC0",
+  "author": "<a href=\"//commons.wikimedia.org/w/index.php?title=User:US_Nessie&amp;action=edit&amp;redlink=1\" class=\"new\" title=\"User:US Nessie (page does not exist)\">US Nessie</a>",
+  "page": "https://commons.wikimedia.org/wiki/File:Goldfish_in_the_Cave.jpg",
+  "file_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c0/Goldfish_in_the_Cave.jpg/960px-Goldfish_in_the_Cave.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+  "sha256": "72248236010c1d6717e661d06d14e46f06682758479c3fc739ebd5eebf4e60a3"
+ }
+}

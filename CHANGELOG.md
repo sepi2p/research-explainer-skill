@@ -3,7 +3,21 @@
 Newest first. Agents: read this after an update to learn new commands; every feature lands here and in SKILL.md in the
 same commit.
 
-## Unreleased
+## 0.3.0 (2026-11-03)
+- Visual storytelling first: SKILL.md and scene-patterns.md plan each beat by what moves; on-screen text is labels.
+  Captions are no longer burned in by default (`"captions": "srt"`; `"burn"` brings the strip back). Without burned
+  captions, text-only beats last as long as their animation plus `"hold"` (default 0.8 s).
+- Motion vocabulary in base.py: `fan`, `gather`, `collapse_to`, `ticker`, `value_axis`, `dot_plot`, `particles`,
+  `push_in`/`pull_out`, `spotlight`.
+- New demo `examples/how-a-network-sees/`: ResNet-18 (ImageNet weights) on CC0 photos fetched with a licence check;
+  pixels, learned filters sweeping, feature maps, prediction, saliency, a 2/255 adversarial change. EN + FA.
+- `bar_chart`: bars now start after the longest label (they covered long labels), and in right-to-left rows the value,
+  not the name, sits at the bar's end.
+- `rx.py promo`: short launch videos (motion graphics in an HTML timeline, captured frame by frame with Playwright, music +
+  sound-effect cues, poster baked in). Template in templates/promo/, guide in references/promo.md, CC0 sound effects in
+  assets/sfx/. `rx.py check` reports whether the engine is installed.
+- Persian text: formulas with Persian digits ("n = ۶۴") stay one left-to-right run inside a Persian sentence.
+- `rx.py assemble` printed minutes rounded up (3:52 as "4:52").
 - LICENSE is now the plain MIT text, so GitHub detects it as MIT. The scope statement (MIT for this repository's own
   files; bundled skills and fonts under their own licences, manimgl-best-practices non-commercial) moved to
   THIRD_PARTY.md and the READMEs. Plugin manifests list all licences: `MIT AND CC-BY-NC-SA-4.0 AND OFL-1.1`.

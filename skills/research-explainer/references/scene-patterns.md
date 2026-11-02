@@ -21,6 +21,36 @@ comparison scene that only places numbers side by side when settings match (else
 Own experiments/study: hook = the question you asked; method; what you measured and how; results with status; what
 surprised you; limits; next steps.
 
+## Visual storytelling first
+The motion carries the explanation; text names things. Test: with the sound off and no subtitles, can a viewer follow the
+story from the motion alone? If not, the beat needs a better visual, not more words.
+- **Continuity**: the same object travels through the story (a photo becomes pixels, pixels become maps, maps become a
+  barcode, the barcode becomes bars). Transform it; don't cut to a new picture.
+- **Many things**: show the many (64 filters, 512 numbers, 20 trials) as real many-objects that pop in, fan out, then
+  gather into the one result.
+- **Process**: show a mechanism running (a filter sweeping the image while the output paints itself; dots flowing through
+  stages), not a diagram of it.
+- **Numbers move**: counters tick to their value (`ticker`); data points fly from where they come from to where they land
+  on the chart (`collapse_to`).
+- **Camera**: move in on what matters (`push_in`, or a magnifier: a small box on the image grows into a large panel).
+- **Words**: on screen at once at most ~6 words, as labels next to what they name. Sentences go to voice or subtitles.
+
+## Motion vocabulary (scripts/explainer/base.py)
+| helper | motion |
+|---|---|
+| `fan(mobs)` | a fanned stack: "there are many of these" |
+| `gather(mobs, target)` | many fly into one and become it (copies -> average, maps -> vector) |
+| `collapse_to(mob, point)` | an image/group shrinks into a data point on a chart |
+| `ticker(tracker, fmt)` | a number that counts as a ValueTracker animates |
+| `value_axis` + `dot_plot` | samples dropping onto a number line |
+| `particles(n, ...)` | seeded clouds: noise, populations, data flowing (with `MoveAlongPath`) |
+| `push_in` / `pull_out` | camera into a region and back |
+| `spotlight(mob, others)` | dim the rest, ring the one |
+| Manim: `TransformMatchingShapes`, `ReplacementTransform`, `FadeIn/FadeOut(target_position=...)`, `LaggedStart`, `ShowPassingFlash`, `Circumscribe`, `always_redraw` + `ValueTracker` | morphs, flights, sweeps, live-updating geometry |
+
+The worked example is `examples/how-a-network-sees/` (a ResNet-18 on CC0 photos: pixels, filters sweeping, feature maps,
+prediction bars, saliency, an adversarial change): read its `scenes/main.py` before writing a new video.
+
 ## Rules of thumb
 - One point per beat, one visual per point. If a beat has no visual change, merge it or add one.
 - Show, then name: animate the mechanism first, then give it its term or formula.
@@ -28,13 +58,14 @@ surprised you; limits; next steps.
 - Real before schematic: show the real image, then the abstraction of it.
 - Keep colours semantic across the video (one colour per actor/method), declared once in project.json "palette".
 - Numbers appear where the eye already is (next to the bar or point), not in a legend far away.
-- Text on screen is short labels; sentences belong in the caption strip.
-- Captions: 1-2 sentences per beat. Persian chunks ≤112 characters, English ≤150 (split automatically).
+- Text on screen is short labels; sentences belong to voice or subtitles.
+- Subtitles: 1-2 sentences per beat. Persian chunks ≤112 characters, English ≤150 (split automatically). They go to the
+  .srt; burned into the picture only with `"captions": "burn"` in project.json (then beats last long enough to read them).
 
 ## Library helpers (scripts/explainer/base.py)
 | helper | use |
 |---|---|
-| `Beat`, `self.beat(i, fn)` | one narration beat with caption and timing |
+| `Beat`, `self.beat(i, fn)` | one beat: its animation, sound and subtitle timing |
 | `T(s, size, color)` | all text (Persian aware); `L("en", fa="...")` for inline translations |
 | `tlines([...])` | lines aligned to the reading start |
 | `img`, `framed`, `array_img` | real images (nearest-neighbour for small images) |

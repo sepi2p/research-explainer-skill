@@ -1,0 +1,255 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Launch video</title>
+<!-- Worked example: the launch video of this skill. Replace the text, media/ frames, data.js and the end card.
+     Every visible number and output must be real (claims.json, assets/, real command output). See references/promo.md. -->
+<style>
+  :root { --bg:#07080b; --text:#f3f3f1; --dim:#8b919c; --accent:#ffd166; --blue:#58c4dd; --red:#ff5d5d; --green:#83c167; --card:#12151b; --edge:#262b35; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html, body { width:1920px; height:1080px; overflow:hidden; background:var(--bg); }
+  #stage { position:absolute; inset:0; overflow:hidden; font-family:Inter, Vazirmatn, sans-serif; color:var(--text); background:var(--bg); }
+  .abs { position:absolute; }
+  .center { left:50%; top:50%; transform:translate(-50%,-50%); }
+  .layer { position:absolute; inset:0; }
+  .grid { position:absolute; inset:-200px; background-image:linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px); background-size:80px 80px; }
+  .glow { position:absolute; width:1400px; height:1400px; border-radius:50%; filter:blur(10px); }
+  .vignette { position:absolute; inset:0; background:radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,.65) 100%); pointer-events:none; }
+  .flash { position:absolute; inset:0; background:#fff; opacity:0; mix-blend-mode:screen; }
+  .big { font-weight:900; letter-spacing:-0.035em; line-height:1; white-space:nowrap; }
+  .mono { font-family:'DejaVu Sans Mono', monospace; }
+  .card { background:var(--card); border:1.5px solid var(--edge); border-radius:22px; box-shadow:0 30px 80px rgba(0,0,0,.55); }
+  .bar { height:46px; border-bottom:1.5px solid var(--edge); display:flex; align-items:center; gap:10px; padding:0 20px; }
+  .dot { width:13px; height:13px; border-radius:50%; }
+  .ttl { margin-left:auto; margin-right:auto; color:var(--dim); font-size:20px; transform:translateX(-30px); }
+  .chip { display:inline-flex; align-items:center; gap:10px; padding:12px 26px; border-radius:999px; border:2px solid; font-size:30px; font-weight:600; background:rgba(18,21,27,.9); white-space:nowrap; }
+  .fa { font-family:Vazirmatn, Inter, sans-serif; direction:rtl; }
+  canvas { display:block; border-radius:0 0 20px 20px; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script src="data.js"></script>
+<script>
+const B = [0.25,0.81,1.34,1.89,2.44,2.99,3.54,4.08,4.62,5.18,5.71,6.27,6.80,7.36,7.89,8.45,8.98,9.54,10.09,10.63,11.18,11.72,
+           12.27,12.81,13.35,13.91,14.44,15.00,15.53,16.09,16.62,17.18,17.71,18.27,18.81,19.35,19.89,20.43,20.98,21.52,22.06];
+const TERM = window.PROMO_DATA;   // data.js, made from assets/terminal.json
+const EN = Array.from({length:78}, (_, k) => `media/en/f${String(k + 1).padStart(3, '0')}.jpg`);
+const FA = Array.from({length:78}, (_, k) => `media/fa/f${String(k + 1).padStart(3, '0')}.jpg`);
+window.promoAssets = [...EN, ...FA, 'media/demo_fa.png', 'media/avatar.png'];
+const { el, css, at, live, lerp, ease, clamp, typed, shake } = P;
+const $ = id => document.getElementById(id);
+const stage = $('stage');
+
+// ---------- background (always on) ----------
+const grid = el('div', 'grid');
+const g1 = css(el('div', 'glow'), { background:'radial-gradient(circle, rgba(255,209,102,.20), transparent 60%)' });
+const g2 = css(el('div', 'glow'), { background:'radial-gradient(circle, rgba(88,196,221,.18), transparent 60%)' });
+const world = css(el('div', 'layer'), {});           // everything that shakes
+el('div', 'vignette');
+const flash = el('div', 'flash');
+
+function L(html, cls = '', style = {}) { const e = el('div', 'abs ' + cls, world, html); css(e, style); return e; }
+function windowCard(w, h, title, parent = world) {
+  const c = el('div', 'abs card', parent);
+  css(c, { width: w + 'px', height: h + 'px' });
+  c.innerHTML = `<div class="bar"><span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span><span class="ttl mono">${title}</span></div>`;
+  return c;
+}
+
+// ---------- S1 hook: real demo numbers drawn as the curve ----------
+const NS = [1, 4, 16, 64], YS = [0.2504, 0.125, 0.0625, 0.0313];     // examples/averaging-noise/assets/data.json
+const svgNS = 'http://www.w3.org/2000/svg';
+const hookSvg = document.createElementNS(svgNS, 'svg');
+hookSvg.setAttribute('width', 1920); hookSvg.setAttribute('height', 1080); hookSvg.style.position = 'absolute';
+world.appendChild(hookSvg);
+const px = k => 1080 + k * 230, py = y => 230 + (0.27 - y) / 0.27 * 620;
+const path = document.createElementNS(svgNS, 'path');
+let d = ''; for (let i = 0; i <= 60; i++) { const n = 1 + i / 60 * 63, x = 1080 + Math.log(n) / Math.log(64) * 690, y = py(0.25 / Math.sqrt(n)); d += (i ? 'L' : 'M') + x + ',' + y; }
+path.setAttribute('d', d); path.setAttribute('fill', 'none'); path.setAttribute('stroke', '#58c4dd'); path.setAttribute('stroke-width', 6);
+path.setAttribute('stroke-linecap', 'round'); path.style.filter = 'drop-shadow(0 0 14px rgba(88,196,221,.7))';
+hookSvg.appendChild(path);
+const PLEN = path.getTotalLength(); path.style.strokeDasharray = PLEN;
+const dots = NS.map((n, k) => { const c = document.createElementNS(svgNS, 'circle'); c.setAttribute('cx', 1080 + Math.log(n) / Math.log(64) * 690);
+  c.setAttribute('cy', py(YS[k])); c.setAttribute('r', 13); c.setAttribute('fill', '#ffd166'); hookSvg.appendChild(c); return c; });
+const h1 = L('Your research,', 'big', { left:'130px', top:'300px', fontSize:'128px' });
+const h2 = L('explained like', 'big', { left:'130px', top:'450px', fontSize:'128px', color:'var(--dim)' });
+const h3 = L('3Blue1Brown.', 'big', { left:'130px', top:'600px', fontSize:'150px', color:'var(--accent)' });
+const h3bar = L('', '', { left:'130px', top:'785px', height:'12px', background:'var(--accent)', borderRadius:'6px' });
+
+// ---------- S2 reveal ----------
+const logo = L('Research Explainer', 'big center', { fontSize:'170px' });
+const logoBar = L('', 'center', { height:'14px', background:'var(--accent)', borderRadius:'7px' });
+const sub = L('papers &amp; experiments <span style="color:var(--accent)">→</span> explainer videos', 'center', { fontSize:'50px', fontWeight:500, color:'#cfd3da', whiteSpace:'nowrap' });
+const chipRow = L('', 'center', { display:'flex', gap:'22px' });
+const chips = [['Claude Code', 'var(--blue)'], ['Codex', '#4fd1c5'], ['English + <span class="fa">فارسی</span>', 'var(--accent)']].map(([t, c]) => {
+  const e = el('div', 'chip', chipRow, t); css(e, { borderColor:c, color:c }); return e; });
+const rings = [0, 1].map(() => L('', 'center', { width:'200px', height:'200px', borderRadius:'50%', border:'4px solid var(--accent)' }));
+const winEN = windowCard(860, 46 + 484, 'english'); const cvEN = document.createElement('canvas'); cvEN.width = 860; cvEN.height = 484; winEN.appendChild(cvEN);
+const winFA = windowCard(860, 46 + 484, 'فارسی'); const cvFA = document.createElement('canvas'); cvFA.width = 860; cvFA.height = 484; winFA.appendChild(cvFA);
+
+// ---------- S3 claims ----------
+const c1 = L('It catches <span style="color:var(--red)">wrong numbers.</span>', 'big', { left:'50%', top:'150px', fontSize:'104px' });
+const c2 = L('Every number needs a <span style="color:var(--green)">source.</span>', 'big', { left:'50%', top:'150px', fontSize:'104px' });
+const nar = windowCard(1150, 200, 'narration_en.json');
+const line = TERM.narration_line, before = TERM.planted.before, after = TERM.planted.after;
+const [pre, post] = [line.slice(0, line.indexOf(before)), line.slice(line.indexOf(before) + before.length)];
+const narText = el('div', 'mono', nar); css(narText, { padding:'34px 40px', fontSize:'34px', lineHeight:'1.45' });
+narText.innerHTML = `${pre.replace('falls ', 'falls<br>')}<span id="num" style="display:inline-block;padding:0 6px;border-radius:8px"></span>${post}`;
+const term = windowCard(1150, 300, 'terminal');
+const tPrompt = el('div', 'mono', term); css(tPrompt, { padding:'26px 40px 6px', fontSize:'32px' });
+const tOut = TERM.planted_run.lines.map(l => { const e = el('div', 'mono', term); css(e, { padding:'6px 40px', fontSize:'25px', color:'#c3c8d0', whiteSpace:'nowrap' });
+  e.innerHTML = l.startsWith('ERROR') ? `<b style="color:var(--red)">ERROR</b>${l.slice(5).replace(after, `<b style="color:var(--red)">${after}</b>`)}` : l; return e; });
+const stamp = L('exit 1', 'center', { fontSize:'92px', fontWeight:900, color:'var(--red)', border:'10px solid var(--red)', borderRadius:'22px', padding:'4px 34px', background:'rgba(7,8,11,.85)' });
+
+// ---------- S4 Persian ----------
+const pEN = L('English.', 'big', { fontSize:'230px', top:'260px' });
+const pFA = L('فارسی.', 'big fa', { fontSize:'250px', top:'230px', color:'var(--accent)' });
+const faImg = L('<img src="media/demo_fa.png" style="width:100%;display:block;border-radius:20px">', 'card', { width:'1150px', overflow:'hidden' });
+const faBox = L('', '', { border:'6px solid var(--accent)', borderRadius:'14px', boxShadow:'0 0 30px rgba(255,209,102,.6)' });
+const pTags = [['right-to-left', 'var(--accent)'], ['Persian digits <span class="fa">۰۱۲۳</span>', 'var(--accent)'], ['Vazirmatn', 'var(--accent)']].map(([t, c]) => L(t, 'chip', { borderColor:c, color:c }));
+
+// ---------- S5 in -> out ----------
+const ins = ['a paper', 'a stack of papers', 'your own experiments'].map(t => L(t, 'card', { fontSize:'50px', fontWeight:600, padding:'28px 44px', whiteSpace:'nowrap' }));
+const outs = [['▶  video · English', 'var(--green)'], ['▶  video · فارسی', 'var(--green)'], ['CC  subtitles', 'var(--blue)'], ['▦  slides', 'var(--dim)']].map(([t, c]) =>
+  L(t, 'card', { fontSize:'42px', fontWeight:600, padding:'20px 38px', color:c, borderColor:c, whiteSpace:'nowrap' }));
+const node = L('<div style="font-size:30px;font-weight:800;line-height:1.15">Research<br>Explainer</div>', 'center',
+  { width:'300px', height:'300px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center',
+    border:'5px solid var(--accent)', background:'radial-gradient(circle, rgba(255,209,102,.18), rgba(18,21,27,.95) 70%)', boxShadow:'0 0 80px rgba(255,209,102,.35)' });
+const inLines = [0, 1, 2].map(() => L('', '', { height:'5px', borderRadius:'3px', background:'linear-gradient(90deg, rgba(255,209,102,0), var(--accent))', transformOrigin:'left center' }));
+const outLines = [0, 1, 2, 3].map(() => L('', '', { height:'5px', borderRadius:'3px', background:'linear-gradient(90deg, var(--accent), rgba(131,193,103,0))', transformOrigin:'left center' }));
+
+// ---------- S6 install + end card ----------
+const inst = windowCard(1500, 170, 'claude code');
+const instText = el('div', 'mono', inst); css(instText, { padding:'32px 40px', fontSize:'38px', whiteSpace:'nowrap' });
+const endLogo = L('Research Explainer', 'big center', { fontSize:'140px' });
+const url = L('github.com/sepi2p/research-explainer-skill', 'mono center', { fontSize:'46px', color:'var(--accent)', whiteSpace:'nowrap' });
+const star = L('<span id="st" style="display:inline-block">★</span>&nbsp; Star it on GitHub', 'center', { fontSize:'48px', fontWeight:700, padding:'22px 50px', borderRadius:'999px', background:'var(--accent)', color:'#111', whiteSpace:'nowrap' });
+const sparks = Array.from({length:10}, () => L('', '', { width:'6px', height:'30px', borderRadius:'3px', background:'var(--accent)' }));
+const sign = L(`<img src="media/avatar.png" style="width:150px;height:150px;border-radius:50%;border:4px solid var(--accent)">
+  <div><div style="font-size:50px;font-weight:700">Built by Sepanta <span style="color:var(--dim);font-weight:500">@sepi2p</span></div>
+  <div style="font-size:32px;color:var(--dim);margin-top:8px">AI researcher &amp; software engineer · free &amp; open source</div></div>`, 'center',
+  { display:'flex', alignItems:'center', gap:'28px', whiteSpace:'nowrap' });
+
+function show(e, o, tx = 0, ty = 0, s = 1, extra = '') {
+  e.style.opacity = o;
+  e.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
+  e.style.transform = `translate(${tx}px, ${ty}px) scale(${s}) ${extra}`;
+}
+function showC(e, o, tx = 0, ty = 0, s = 1, extra = '') {   // centred elements
+  e.style.opacity = o;
+  e.style.visibility = o <= 0.001 ? 'hidden' : 'visible';
+  e.style.transform = `translate(-50%, -50%) translate(${tx}px, ${ty}px) scale(${s}) ${extra}`;
+}
+function blurIn(e, t, start, dur = 0.45) { const p = at(t, start, dur, ease.outExpo); e.style.filter = `blur(${(1 - p) * 18}px)`; return p; }
+
+window.renderFrame = function (t) {
+  // background drift
+  css(grid, { transform:`translate(${-(t * 22) % 80}px, ${-(t * 12) % 80}px)` });
+  css(g1, { left:`${-500 + 120 * Math.sin(t * 0.35)}px`, top:`${-650 + 80 * Math.cos(t * 0.3)}px` });
+  css(g2, { left:`${1000 + 140 * Math.cos(t * 0.3)}px`, top:`${200 + 90 * Math.sin(t * 0.4)}px` });
+  // flashes on the big hits
+  const fl = [[2.99, .55], [12.27, .25], [19.35, .45]].reduce((m, [a, v]) => Math.max(m, t >= a ? v * Math.exp(-(t - a) * 9) : 0), 0);
+  flash.style.opacity = fl;
+  const sh = shake(t, 10.09, 16, .45) + shake(t, 2.99, 8, .3) + shake(t, 19.35, 7, .3);
+  world.style.transform = `translate(${sh}px, ${sh * 0.6}px)`;
+
+  // ---- S1 hook 0 - 2.99 ----
+  const s1 = live(t, -1, 2.99, .12);
+  const zoomOut = at(t, 2.72, .27, ease.inExpo);
+  hookSvg.style.opacity = s1 * 0.95; hookSvg.style.transform = `scale(${1 + zoomOut * .25})`;
+  path.style.strokeDashoffset = PLEN * (1 - at(t, 0.1, 2.3, ease.inOut));
+  dots.forEach((c, k) => { const p = at(t, 0.25 + k * 0.55, .35, ease.outBack); c.setAttribute('r', 14 * p); });
+  [[h1, B[0]], [h2, B[2]], [h3, B[3]]].forEach(([e, a]) => {
+    const p = blurIn(e, t, a, .4);
+    show(e, s1 * p, (1 - p) * -60 - zoomOut * 120, 0, 1 + zoomOut * .3);
+    e.style.filter = `blur(${(1 - p) * 18 + zoomOut * 14}px)`;
+  });
+  css(h3bar, { width:`${at(t, B[4], .35, ease.outExpo) * h3.offsetWidth}px`, opacity:s1 * (1 - zoomOut) });
+
+  // ---- S2 reveal 2.99 - 7.36 ----
+  const s2 = live(t, 2.99, 7.30, .08);
+  const up = at(t, B[9], .5, ease.inOut);                 // logo block moves up when footage arrives
+  const lp = blurIn(logo, t, 2.99, .5);
+  const ls = lerp(1.35, 1, at(t, 2.99, .55, ease.outBack));
+  showC(logo, s2 * lp, 0, lerp(-40, -410, up), ls * lerp(1, .5, up));
+  css(logoBar, { width:`${at(t, 3.1, .4, ease.outExpo) * 1050 * lerp(1, .5, up)}px` });
+  showC(logoBar, s2, 0, lerp(85, -365, up));
+  const sp = at(t, B[6], .45);
+  showC(sub, s2 * sp, 0, lerp(190, -300, up) + (1 - sp) * 30, lerp(1, .72, up));
+  showC(chipRow, s2, 0, lerp(310, 370, up));
+  chips.forEach((c, k) => { const p = at(t, B[7] + k * .12, .4, ease.outBack); show(c, clamp(p * 3), 0, (1 - p) * 30, .6 + .4 * p); });
+  rings.forEach((r, k) => { const p = clamp((t - 2.99 - k * .12) / .9); showC(r, s2 * (1 - p) * (t >= 2.99 + k * .12), 0, -40, 1 + p * 9); });
+  const whip = at(t, 7.12, .24, ease.inExpo);
+  const e1 = at(t, B[9], .6, ease.outExpo), e2 = at(t, B[10], .6, ease.outExpo);
+  css(winEN, { left:'110px', top:'290px' }); css(winFA, { left:'950px', top:'330px' });
+  show(winEN, s2 * clamp(e1 * 2), (1 - e1) * -500 - whip * 2200, (1 - e1) * 200, .92 + .08 * e1, `perspective(1600px) rotateY(${lerp(28, 9, e1)}deg)`);
+  show(winFA, s2 * clamp(e2 * 2), (1 - e2) * 500 - whip * 2200, (1 - e2) * 200, .92 + .08 * e2, `perspective(1600px) rotateY(${lerp(-28, -9, e2)}deg)`);
+  winEN.style.filter = winFA.style.filter = `blur(${whip * 12}px)`;
+  if (t >= B[9] - .1 && t < 7.4) { P.seq(cvEN, EN, t, B[9]); P.seq(cvFA, FA, t, B[10]); }
+
+  // ---- S3 claims 7.36 - 12.27 ----
+  const s3 = live(t, 7.36, 12.17, .1);
+  const swap = at(t, B[19], .35);
+  { const p = blurIn(c1, t, B[13], .4); show(c1, s3 * p * (1 - swap), -c1.offsetWidth / 2, (1 - p) * 40 - swap * 40, lerp(1.2, 1, at(t, B[13], .4, ease.outBack))); }
+  { const p = at(t, B[19] + .12, .4, ease.outExpo); show(c2, s3 * p, -c2.offsetWidth / 2, (1 - p) * 40); c2.style.filter = `blur(${(1 - p) * 14}px)`; }
+  const np = at(t, B[14], .5, ease.outExpo);
+  css(nar, { left:'200px', top:'330px' }); show(nar, s3 * np, 0, (1 - np) * 120);
+  const num = $('num');
+  const g = t >= B[15] && t < B[15] + .3;
+  num.textContent = t < B[15] + .15 ? before : after;
+  css(num, { color: t < B[15] ? '#58c4dd' : 'var(--red)', background: t < B[15] ? 'rgba(88,196,221,.15)' : 'rgba(255,93,93,.18)',
+    textShadow: g ? `${4 * Math.sin(t * 90)}px 0 #0ff, ${-4 * Math.sin(t * 70)}px 0 #f0f` : 'none',
+    transform: g ? `translateX(${6 * Math.sin(t * 120)}px) skewX(${12 * Math.sin(t * 60)}deg)` : 'none', outline: t >= B[15] ? '3px solid var(--red)' : 'none' });
+  const tp = at(t, B[16], .45, ease.outExpo);
+  css(term, { left:'200px', top:'580px' }); show(term, s3 * tp, 0, (1 - tp) * 140);
+  tPrompt.innerHTML = '<span style="color:var(--accent)">$ </span>';
+  const span = document.createElement('span'); typed(span, 'rx.py claims', t, B[16] + .1, 26, t < B[17]); tPrompt.appendChild(span);
+  tOut.forEach((e, k) => { const p = at(t, B[17] + k * .14, .25, ease.outExpo); e.style.opacity = s3 * p; e.style.transform = `translateX(${(1 - p) * -40}px)`; });
+  { const p = at(t, B[18], .3, ease.outBack); showC(stamp, s3 * clamp(p * 2), 640, -10, lerp(2.4, 1, clamp(p)), 'rotate(-8deg)'); }
+
+  // ---- S4 Persian 12.27 - 15.53 ----
+  const s4 = live(t, 12.27, 15.45, .1);
+  const shrink = at(t, B[24], .5, ease.inOut);
+  { const p = blurIn(pEN, t, B[22], .35); css(pEN, { left:`${lerp(170, 470, shrink)}px` }); show(pEN, s4 * p, (1 - p) * -150, lerp(0, -170, shrink), lerp(1, .42, shrink)); pEN.style.transformOrigin = 'left top'; }
+  { const p = blurIn(pFA, t, B[23], .35); css(pFA, { left:`${lerp(1130, 1080, shrink)}px` }); show(pFA, s4 * p, (1 - p) * 150, lerp(0, -150, shrink), lerp(1, .42, shrink)); pFA.style.transformOrigin = 'left top'; }
+  const fp = at(t, B[24], .55, ease.outExpo);
+  css(faImg, { left:'385px', top:'250px' }); show(faImg, s4 * fp, 0, (1 - fp) * 160, .9 + .1 * fp + at(t, B[24], 2.2, ease.linear) * .03);
+  // n = 64 ... n = 1 label row of the Persian frame: pixels (190..780, 44..80) of 960x540, image shown 1150 wide
+  const k = 1150 / 960, bp = at(t, B[25], .35, ease.outBack);
+  css(faBox, { left:`${385 + 180 * k}px`, top:`${250 + 38 * k}px`, width:`${610 * k}px`, height:`${50 * k}px` });
+  show(faBox, s4 * clamp(bp * 2), 0, 0, lerp(1.25, 1, clamp(bp)));
+  pTags.forEach((c, i) => { const p = at(t, B[25] + .2 + i * .14, .4, ease.outBack); css(c, { left:`${[470, 850, 1335][i]}px`, top:'930px' }); show(c, s4 * clamp(p * 3), 0, (1 - p) * 30); });
+
+  // ---- S5 in -> out 15.53 - 18.27 ----
+  const s5 = live(t, 15.53, 18.2, .1);
+  const NX = 960, NY = 540;
+  { const p = at(t, B[28], .45, ease.outBack); showC(node, s5 * clamp(p * 2), 0, 0, (.6 + .4 * p) * (1 + .05 * Math.sin(t * 9) * (t > B[31]))); }
+  const link = (e, x1, y1, x2, y2, p) => { const L_ = Math.hypot(x2 - x1, y2 - y1), a = Math.atan2(y2 - y1, x2 - x1);
+    css(e, { left:`${x1}px`, top:`${y1}px`, width:`${L_}px`, transform:`rotate(${a}rad) scaleX(${p})`, opacity:s5 * (p > 0) }); };
+  ins.forEach((c, i) => { const p = at(t, B[28 + i], .35, ease.outBack); const y = 300 + i * 200;
+    css(c, { left:'110px', top:`${y - 55}px` }); show(c, s5 * clamp(p * 2), (1 - p) * -200, 0, .85 + .15 * p);
+    link(inLines[i], 110 + c.offsetWidth + 20, y, NX - 160, NY + (i - 1) * 60, at(t, B[28 + i] + .15, .3, ease.outExpo)); });
+  outs.forEach((c, i) => { const p = at(t, B[31] + .1 + i * .09, .35, ease.outBack); const y = 255 + i * 190;
+    css(c, { left:'1390px', top:`${y - 45}px` }); show(c, s5 * clamp(p * 2), (1 - p) * 160, 0, .85 + .15 * p);
+    link(outLines[i], NX + 160, NY + (i - 1.5) * 50, 1370, y, at(t, B[31] + i * .09, .25, ease.outExpo)); });
+
+  // ---- S6 install 18.27 - 19.35, end card 19.35 - end ----
+  const s6a = live(t, 18.27, 19.30, .08);
+  { const p = at(t, B[33], .35, ease.outExpo); css(inst, { left:'210px', top:'455px' }); show(inst, s6a * p, 0, (1 - p) * 80, .95 + .05 * p);
+    instText.innerHTML = '<span style="color:var(--blue)">&gt; </span>'; const sp_ = document.createElement('span');
+    typed(sp_, '/plugin install research-explainer@research-explainer-skill', t, B[33] + .1, 70); instText.appendChild(sp_); }
+  const s6 = live(t, 19.35, 99, .05);
+  { const p = blurIn(endLogo, t, 19.35, .45); showC(endLogo, s6 * p, 0, -270, lerp(1.3, 1, at(t, 19.35, .5, ease.outBack))); }
+  { const p = at(t, 19.6, .4); showC(url, s6 * p, 0, -125 + (1 - p) * 20); }
+  { const p = at(t, B[36], .4, ease.outBack); showC(star, s6 * clamp(p * 2), 0, 25, lerp(.5, 1, p));
+    const st = document.getElementById('st'); st.style.transform = `rotate(${at(t, B[36], .6, ease.outExpo) * 144}deg) scale(${1 + .4 * Math.exp(-(t - B[36]) * 6) * (t > B[36])})`; }
+  sparks.forEach((s, i) => { const a = i / 10 * Math.PI * 2, p = clamp((t - B[36] - .1) / .5);
+    css(s, { left:`${960 + Math.cos(a) * (190 + p * 120)}px`, top:`${565 + Math.sin(a) * (80 + p * 80)}px`, opacity: s6 * (t > B[36] + .1) * (1 - p),
+      transform:`rotate(${a * 180 / Math.PI + 90}deg) scaleY(${1 - p * .6})` }); });
+  { const p = at(t, B[37], .5, ease.outExpo); showC(sign, s6 * p, 0, 300 + (1 - p) * 40); }
+};
+</script>
+</body>
+</html>

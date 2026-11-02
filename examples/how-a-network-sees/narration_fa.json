@@ -1,0 +1,135 @@
+{
+ "scenes": [
+  {
+   "id": "s00_title",
+   "beats": [
+    {
+     "visual": "real pixel colours fly in and assemble the photo; title rises",
+     "say": "",
+     "caption": "",
+     "min_dur": 4.0
+    }
+   ]
+  },
+  {
+   "id": "s01_pixels",
+   "beats": [
+    {
+     "visual": "camera pushes into the nose; the real 8-bit RGB values of a 6x6 patch appear over the pixels",
+     "say": "برای یک شبکهٔ عصبی، این عکس جدولی از عددهاست.",
+     "caption": "برای یک شبکهٔ عصبی، این عکس جدولی از عددهاست."
+    },
+    {
+     "visual": "camera pulls out; the photo splits into its red, green and blue planes, which slide apart in depth",
+     "say": "۲۲۴ در ۲۲۴ پیکسل، هر کدام ۳ رنگ: ۱۵۰٬۵۲۸ عدد.",
+     "caption": "۲۲۴ در ۲۲۴ پیکسل، هر کدام ۳ رنگ: ۱۵۰٬۵۲۸ عدد."
+    }
+   ]
+  },
+  {
+   "id": "s02_filters",
+   "beats": [
+    {
+     "visual": "the 64 real filters pop in as a grid, tile by tile; three that respond most lift out",
+     "say": "لایهٔ اول ۶۴ فیلتر کوچک دارد که از ImageNet یاد گرفته شده‌اند.",
+     "caption": "لایهٔ اول ۶۴ فیلتر کوچک دارد که از ImageNet یاد گرفته شده‌اند."
+    },
+    {
+     "visual": "one filter sweeps the photo row by row while its feature map paints itself beside it",
+     "say": "هر فیلتر روی تصویر می‌لغزد و هر جا الگویش باشد روشن می‌شود.",
+     "caption": "هر فیلتر روی تصویر می‌لغزد و هر جا الگویش باشد روشن می‌شود."
+    },
+    {
+     "visual": "the three filters each drop onto their own map",
+     "say": "سه نقشه از ۶۴ نقشه.",
+     "caption": "سه نقشه از ۶۴ نقشه."
+    }
+   ]
+  },
+  {
+   "id": "s03_layers",
+   "beats": [
+    {
+     "visual": "five fanned stacks of real channel maps, shrinking; particles stream through them; the camera tracks right",
+     "say": "لایه به لایه، نقشه‌ها کوچک‌تر و بیشتر می‌شوند: از ۶۴ نقشهٔ ۱۱۲ در ۱۱۲ تا ۵۱۲ نقشهٔ ۷ در ۷.",
+     "caption": "لایه به لایه، نقشه‌ها کوچک‌تر و بیشتر می‌شوند: از ۶۴ نقشهٔ ۱۱۲ در ۱۱۲ تا ۵۱۲ نقشهٔ ۷ در ۷."
+    }
+   ]
+  },
+  {
+   "id": "s04_decision",
+   "beats": [
+    {
+     "visual": "the last stack collapses into a barcode of the 512 real pooled values",
+     "say": "۵۱۲ نقشه به ۵۱۲ عدد میانگین می‌شوند.",
+     "caption": "۵۱۲ نقشه به ۵۱۲ عدد میانگین می‌شوند."
+    },
+    {
+     "visual": "the barcode streams into five probability bars that grow; the top one counts up to its value",
+     "say": "این عددها برای هر کدام از ۱٬۰۰۰ دسته امتیاز می‌سازند. گلدن رتریور: ۷۳٫۵٪.",
+     "caption": "این عددها برای هر کدام از ۱٬۰۰۰ دسته امتیاز می‌سازند. گلدن رتریور: ۷۳٫۵٪."
+    }
+   ]
+  },
+  {
+   "id": "s05_saliency",
+   "beats": [
+    {
+     "visual": "the photo returns; a heat map washes over it from left to right",
+     "say": "این پاسخ به کدام پیکسل‌ها حساس‌تر است؟ این‌جا.",
+     "caption": "این پاسخ به کدام پیکسل‌ها حساس‌تر است؟ این‌جا."
+    }
+   ]
+  },
+  {
+   "id": "s06_gallery",
+   "beats": [
+    {
+     "visual": "two photo cards fly in and flip to show their labels",
+     "say": "عکس‌های دیگر: ماهی قرمز، ۹۸٫۴٪. گربه‌ای که آن را گربهٔ مصری می‌نامد، ۳۵٫۵٪.",
+     "caption": "عکس‌های دیگر: ماهی قرمز، ۹۸٫۴٪. گربه‌ای که آن را گربهٔ مصری می‌نامد، ۳۵٫۵٪."
+    },
+    {
+     "visual": "a third card lands; its label is struck in red",
+     "say": "و گاهی اشتباه می‌کند: این گربه، تلهٔ موش است، ۴۹٫۱٪.",
+     "caption": "و گاهی اشتباه می‌کند: این گربه، تلهٔ موش است، ۴۹٫۱٪."
+    }
+   ]
+  },
+  {
+   "id": "s07_attack",
+   "beats": [
+    {
+     "visual": "a shimmering change pattern (shown 64 times stronger) slides onto the photo",
+     "say": "حالا هر مقدار پیکسل را حداکثر ۲ از ۲۵۵ تغییر دهید.",
+     "caption": "حالا هر مقدار پیکسل را حداکثر ۲ از ۲۵۵ تغییر دهید."
+    },
+    {
+     "visual": "before and after side by side; a slider wipes between them",
+     "say": "برای ما، عکس همان است.",
+     "caption": "برای ما، عکس همان است."
+    },
+    {
+     "visual": "the bars from before re-sort: golden retriever drains, goldfish shoots to the top",
+     "say": "برای شبکه، حالا ماهی قرمز است، با بیش از ۹۹٫۹۹٪.",
+     "caption": "برای شبکه، حالا ماهی قرمز است، با بیش از ۹۹٫۹۹٪."
+    },
+    {
+     "visual": "the caveat tags settle under the result",
+     "say": "یک مدل، یک عکس، مهاجمی که وزن‌ها را می‌داند. با این حال: ۲ از ۲۵۵ کافی بود.",
+     "caption": "یک مدل، یک عکس، مهاجمی که وزن‌ها را می‌داند. با این حال: ۲ از ۲۵۵ کافی بود."
+    }
+   ]
+  },
+  {
+   "id": "s08_close",
+   "beats": [
+    {
+     "visual": "thumbnails of every asset fly out of experiments/network.py into a grid",
+     "say": "همهٔ تصویرهای این ویدئو از یک اسکریپت آمده‌اند، روی عکس‌های واقعی.",
+     "caption": "همهٔ تصویرهای این ویدئو از یک اسکریپت آمده‌اند، روی عکس‌های واقعی."
+    }
+   ]
+  }
+ ]
+}

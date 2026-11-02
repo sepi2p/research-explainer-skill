@@ -42,6 +42,13 @@ download larger than about 500 MB.
 8. Tell the user it is installed and that a **new Claude Code session** is needed for the skill to appear. Then tell them
    how to start: "make an explainer video of <paper/project>".
 
+### Optional: launch-video engine
+Needed only for `rx.py promo` (short promo videos). Requires Node.js 18+:
+```
+cd <skill folder>/promo && npm install && npx playwright install chromium
+```
+(Chromium download is ~150 MB; ask the user first.)
+
 ## Install (OpenAI Codex CLI / IDE, ChatGPT desktop app)
 
 Steps 1-3 above (system tools, Manim) are the same. Then either:

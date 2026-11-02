@@ -1,0 +1,135 @@
+{
+ "scenes": [
+  {
+   "id": "s00_title",
+   "beats": [
+    {
+     "visual": "real pixel colours fly in and assemble the photo; title rises",
+     "say": "",
+     "caption": "",
+     "min_dur": 4.0
+    }
+   ]
+  },
+  {
+   "id": "s01_pixels",
+   "beats": [
+    {
+     "visual": "camera pushes into the nose; the real 8-bit RGB values of a 6x6 patch appear over the pixels",
+     "say": "To a neural network, this photo is a grid of numbers.",
+     "caption": "To a neural network, this photo is a grid of numbers."
+    },
+    {
+     "visual": "camera pulls out; the photo splits into its red, green and blue planes, which slide apart in depth",
+     "say": "224 by 224 pixels, 3 colours each: 150,528 numbers.",
+     "caption": "224 by 224 pixels, 3 colours each: 150,528 numbers."
+    }
+   ]
+  },
+  {
+   "id": "s02_filters",
+   "beats": [
+    {
+     "visual": "the 64 real filters pop in as a grid, tile by tile; three that respond most lift out",
+     "say": "Its first layer has 64 small filters, learned from ImageNet.",
+     "caption": "Its first layer has 64 small filters, learned from ImageNet."
+    },
+    {
+     "visual": "one filter sweeps the photo row by row while its feature map paints itself beside it",
+     "say": "Each filter slides across the image and lights up where its pattern appears.",
+     "caption": "Each filter slides across the image and lights up where its pattern appears."
+    },
+    {
+     "visual": "the three filters each drop onto their own map",
+     "say": "Three of the 64 maps.",
+     "caption": "Three of the 64 maps."
+    }
+   ]
+  },
+  {
+   "id": "s03_layers",
+   "beats": [
+    {
+     "visual": "five fanned stacks of real channel maps, shrinking; particles stream through them; the camera tracks right",
+     "say": "Layer after layer, the maps get smaller and more numerous: from 64 maps of 112 by 112 to 512 maps of 7 by 7.",
+     "caption": "Layer after layer, the maps get smaller and more numerous: from 64 maps of 112 by 112 to 512 maps of 7 by 7."
+    }
+   ]
+  },
+  {
+   "id": "s04_decision",
+   "beats": [
+    {
+     "visual": "the last stack collapses into a barcode of the 512 real pooled values",
+     "say": "The 512 maps are averaged into 512 numbers.",
+     "caption": "The 512 maps are averaged into 512 numbers."
+    },
+    {
+     "visual": "the barcode streams into five probability bars that grow; the top one counts up to its value",
+     "say": "Those become a score for each of 1,000 classes. Golden retriever: 73.5%.",
+     "caption": "Those become a score for each of 1,000 classes. Golden retriever: 73.5%."
+    }
+   ]
+  },
+  {
+   "id": "s05_saliency",
+   "beats": [
+    {
+     "visual": "the photo returns; a heat map washes over it from left to right",
+     "say": "Where is that answer most sensitive? Here.",
+     "caption": "Where is that answer most sensitive? Here."
+    }
+   ]
+  },
+  {
+   "id": "s06_gallery",
+   "beats": [
+    {
+     "visual": "two photo cards fly in and flip to show their labels",
+     "say": "Other photos: goldfish, 98.4%. A tabby it calls Egyptian cat, 35.5%.",
+     "caption": "Other photos: goldfish, 98.4%. A tabby it calls Egyptian cat, 35.5%."
+    },
+    {
+     "visual": "a third card lands; its label is struck in red",
+     "say": "And sometimes it is wrong: this cat is a mousetrap, 49.1%.",
+     "caption": "And sometimes it is wrong: this cat is a mousetrap, 49.1%."
+    }
+   ]
+  },
+  {
+   "id": "s07_attack",
+   "beats": [
+    {
+     "visual": "a shimmering change pattern (shown 64 times stronger) slides onto the photo",
+     "say": "Now change every pixel value by at most 2 out of 255.",
+     "caption": "Now change every pixel value by at most 2 out of 255."
+    },
+    {
+     "visual": "before and after side by side; a slider wipes between them",
+     "say": "To us, the photo looks the same.",
+     "caption": "To us, the photo looks the same."
+    },
+    {
+     "visual": "the bars from before re-sort: golden retriever drains, goldfish shoots to the top",
+     "say": "To the network, it is now a goldfish, with more than 99.99%.",
+     "caption": "To the network, it is now a goldfish, with more than 99.99%."
+    },
+    {
+     "visual": "the caveat tags settle under the result",
+     "say": "One model, one photo, an attacker who knows the weights. Still: 2 out of 255 was enough.",
+     "caption": "One model, one photo, an attacker who knows the weights. Still: 2 out of 255 was enough."
+    }
+   ]
+  },
+  {
+   "id": "s08_close",
+   "beats": [
+    {
+     "visual": "thumbnails of every asset fly out of experiments/network.py into a grid",
+     "say": "Every image here came from one script, run on real photos.",
+     "caption": "Every image here came from one script, run on real photos."
+    }
+   ]
+  }
+ ]
+}

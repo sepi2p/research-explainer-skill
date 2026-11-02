@@ -10,9 +10,13 @@ description: |
 
 # Research explainer
 
-Turns research into a narrated (or text-only) animated video in the 3Blue1Brown style, built with Manim Community Edition,
-where every number on screen is traceable to a source and every image comes from real data. The same claims and assets can
-become a slide deck.
+Turns research into an animated video in the 3Blue1Brown style, built with Manim Community Edition, where every number on
+screen is traceable to a source and every image comes from real data. The same claims and assets can become a slide deck.
+
+**Visual first.** The motion is the explanation: objects split, stack, morph, slide across each other, collapse into chart
+points, and the camera moves to what matters. Words are labels. Voice and subtitles are optional layers on top; captions are
+not burned into the video unless the user asks (`"captions": "burn"`); an `.srt` file is always written. Plan every beat by
+what moves before deciding what is said.
 
 Bundled companions (install.sh puts them next to this skill): `manim-composer` (scene planning), `manimce-best-practices`
 (Manim CE code), `manimgl-best-practices` (only if the user wants ManimGL). Read them when planning and coding scenes.
@@ -54,7 +58,8 @@ follow-ups: [references/intake.md](references/intake.md).
      put it and read it only from there.
 5. **Experiments.** May we run code to make real figures (their code, or small new experiments)? GPU available? Any run
    longer than about 10 minutes needs their go-ahead.
-6. **Outputs.** Video only, video + slides, slides only. Resolution (720p is usually enough).
+6. **Outputs.** Video only, video + slides, slides only, a short launch video. Resolution (720p is usually enough).
+   Subtitles as a separate .srt (default) or burned into the video.
 7. **Status of the work.** Which results are final, which are preliminary or planned; anything unpublished that must not
    appear; anything that must appear (a caveat, a funder, a co-author).
 
@@ -107,18 +112,21 @@ or anything a viewer could mistake for an experimental output; mark them `genera
 
 ## 5. Plan the scenes (scenes.md) and get approval
 
-Use the `manim-composer` method: hook question, narrative arc, one point per beat, a visual for every point. Our additions
-are in [references/scene-patterns.md](references/scene-patterns.md) (status tags, source lines, step tracker, amplified
-differences, "where we are not best" scene, closing). For each scene list: purpose, beats (what is said, what is shown),
-which claims (ids) and assets it uses. **Show scenes.md to the user and wait for approval before coding.**
+Use the `manim-composer` method: hook question, narrative arc, one point per beat. For each beat write first **what moves**
+(the transformation the eye follows: "the 64 filters pop in; three lift out; one sweeps the photo while its map paints"),
+then the words. Our patterns and the motion vocabulary are in [references/scene-patterns.md](references/scene-patterns.md).
+For each scene list: purpose, beats (motion, then words), which claims (ids) and assets it uses. A beat without a
+transformation is not a beat. **Show scenes.md to the user and wait for approval before coding.**
 
 ## 6. Write narration and scenes
 
-- `narration_<lang>.json`: scenes -> beats. One beat = one or two sentences = one animation step. Numbers in the narration
+- `narration_<lang>.json`: scenes -> beats. One beat = one animation step: `"visual"` (what moves, from scenes.md), `"say"`
+  (voice), `"caption"` (subtitle), optional `"hold"` (seconds to rest after the motion, default 0.8). Numbers in the narration
   must match the ledger (`rx.py claims` fails otherwise). Persian: write natural Persian, not a word-by-word translation;
   see [references/persian.md](references/persian.md).
 - `scenes/*.py`: one class per scene, `class S03Chart(Beat): SCENE_ID = "s03_chart"`, then `self.beat(i, fn)` for every beat
-  in order. Read numbers with `data()`; never type a measured number into scene code. Use `T()` for all text, `tag()` for
+  in order. Read numbers with `data()`; never type a measured number into scene code. Use the motion vocabulary
+(`fan`, `gather`, `collapse_to`, `ticker`, `dot_plot`, `particles`, `push_in`, `spotlight`) and Manim's transforms. Use `T()` for all text, `tag()` for
   status, `source_note()` for the source line, `framed()/img()` for real images, `amplified()` for invisible differences.
   The library is `scripts/explainer/base.py`; read it once.
 - Register every scene in `project.json` -> `scenes` (`id`, `file`, `class`), in playing order.
@@ -154,6 +162,14 @@ voices in [references/voice.md](references/voice.md).
 Same ledger, same assets, same order. See [references/slides.md](references/slides.md): a Slides artifact when the
 environment offers one, otherwise `templates/deck.html` (a single HTML file, right-to-left ready, prints to PDF) or a
 .pptx via a pptx skill.
+
+## 10. Launch video (optional)
+
+A 15-25 s promo with kinetic type, real footage from the explainer, music and sound effects, for social posts or a README.
+`rx.py promo [dir]` renders `<dir>/index.html` frame by frame in headless Chromium and mixes `<dir>/promo.json` (music file +
+offset, sound-effect cues from `assets/sfx/`). Start from `templates/promo/`; read [references/promo.md](references/promo.md).
+Same accuracy rules: every number and screen on it is real (from claims.json, assets/, or real command output). Music is the
+user's choice of a track they may use; never put a track of unknown licence into a shared repo.
 
 ## When the skill cannot do something
 

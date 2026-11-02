@@ -23,7 +23,9 @@ LATIN_FONT = CONF.get("latin_font", "Inter")
 RTL_FONT = CONF.get("rtl_font", "Vazirmatn")
 config.background_color = BG
 
-CAP_STRIP = 1.25            # caption strip under the 16:9 picture (frame units)
+CAPTIONS = CONF.get("captions", "srt")   # "srt": subtitles only as a separate .srt, the whole frame is picture (default)
+                                         # "burn": a caption strip under the picture, captions burned into the video
+CAP_STRIP = 1.25 if CAPTIONS == "burn" else 0.0   # caption strip height (frame units)
 FRAME_H = 8 + CAP_STRIP
 START = RIGHT if RTL else LEFT   # text groups align to the reading start
 
@@ -72,7 +74,11 @@ RTL_LETTERS = re.compile("[\u0590-\u05ff\u0620-\u065f\u066e-\u06ef\u06fa-\u06ff\
 
 _LAT = "A-Za-z\u0370-\u03ff∞√∑∏∫∂∇"            # Latin and Greek letters, math operators that start a run
 _MID = _LAT + "0-9_+\\-./−×÷=·,()\\[\\]^<>≤≥≈±→←|' \u0303"
-LATIN_RUN = re.compile(f"[{_LAT}][{_MID}]*[{_LAT}0-9+)\\]\u0303]|[{_LAT}]")
+_OPS = "=<>≤≥≈±×÷+\\-−/·"
+_FA_NUM = "\u06f0-\u06f9\u0660-\u0669\u066b\u066c"
+# a Latin/math run, plus "= ۶۴"-style tails (operator, then Persian digits), so "n = ۶۴" stays one left-to-right run;
+# Persian digits after a plain word ("ResNet ۱۸") stay on the Persian side
+LATIN_RUN = re.compile(f"[{_LAT}](?:[{_MID}]*[{_LAT}0-9+)\\]\u0303])?(?:\\s*[{_OPS}]\\s*[0-9{_FA_NUM}]+)*")
 
 
 def _esc(s):
@@ -201,8 +207,8 @@ def bar_chart(labels, values, w=6.0, row=0.42, color=BLUE_, hi=None, hi_color=AC
     xs = [r[1].get_left()[0] if not RTL else r[1].get_right()[0] for r in rows]
     for r, x in zip(rows, xs):
         edge = r[1].get_left()[0] if not RTL else r[1].get_right()[0]
-        r[1].shift(RIGHT * ((min(xs) if not RTL else max(xs)) - edge))
-        r[2].next_to(r[1], RIGHT if not RTL else LEFT, buff=0.2)
+        r[1].shift(RIGHT * ((max(xs) if not RTL else min(xs)) - edge))   # bars start after the longest label
+        (r[0] if RTL else r[2]).next_to(r[1], RIGHT if not RTL else LEFT, buff=0.2)   # the value sits at the bar's end
     return rows
 
 
@@ -248,6 +254,74 @@ def steps_tracker(names, active):
     return items.arrange(RIGHT, buff=0.35).to_corner(UL if RTL else UR, buff=0.3)
 
 
+# ---------- motion vocabulary (visual storytelling: the motion is the explanation) ----------
+def ticker(tracker, fmt="{:.3f}", size=36, color=TEXT, place=None, **kw):
+    """A number that follows a ValueTracker while it animates (an error counting down, a count going up).
+    place: function that positions the new text each frame, e.g. lambda m: m.next_to(dot, UP)."""
+    def make():
+        m = T(fmt.format(tracker.get_value()), size, color, **kw)
+        return place(m) if place else m
+    return always_redraw(make)
+
+
+def fan(mobs, dx=0.16, dy=-0.12):
+    """Lay objects as a fanned stack (each shifted a little), so the viewer sees there are many of them."""
+    base = mobs[0].get_center()
+    for k, m in enumerate(mobs):
+        m.move_to(base + k * np.array([dx, dy, 0])).set_z_index(k)
+    return Group(*mobs)
+
+
+def gather(mobs, target, run_time=1.6, lag=0.06):
+    """Many objects fly into one place and become `target` (n copies -> their average). Returns an animation."""
+    c = target.get_center()
+    flights = [FadeOut(m, target_position=c, scale=max(target.height / max(m.height, 1e-6), 0.2)) for m in mobs]
+    return Succession(LaggedStart(*flights, lag_ratio=lag), FadeIn(target, scale=1.08), run_time=run_time)
+
+
+def collapse_to(m, point, color=ACCENT, radius=0.09):
+    """An image or group collapses into a data point (an averaged image becomes its error on a chart).
+    Returns (dot, animation); add the dot to later groups."""
+    d = Dot(point, radius=radius, color=color)
+    return d, Succession(FadeOut(m, target_position=point, scale=0.04), GrowFromCenter(d))
+
+
+def value_axis(x0, x1, lo, hi, y=0.0, color=DIM):
+    """A plain horizontal value line. Returns (line, f) with f(value) -> point."""
+    line = Line([x0, y, 0], [x1, y, 0], color=color, stroke_width=2)
+    return line, (lambda v: np.array([x0 + (v - lo) / (hi - lo) * (x1 - x0), y, 0]))
+
+
+def dot_plot(values, f, color=BLUE_, r=0.055, rise=0.0):
+    """One dot per value on a value_axis mapping f; rise lifts dots that share a position into a little column."""
+    dots = VGroup()
+    for v in values:
+        p = f(v)
+        dots.add(Dot(p + UP * rise, radius=r, color=color))
+    return dots
+
+
+def particles(n, center=ORIGIN, spread=1.0, seed=0, color=GREY_, r=0.03, opacity=0.8):
+    """Seeded cloud of dots (noise, samples, a population). Same seed, same cloud."""
+    g = np.random.default_rng(seed)
+    pts = g.normal(0, spread, (n, 2))
+    return VGroup(*[Dot(np.array(center) + [x, y, 0], radius=r, color=color, fill_opacity=opacity) for x, y in pts])
+
+
+def push_in(scene, target, zoom=2.0):
+    """Camera moves in on a region (a pixel, a detail of a chart). Undo with pull_out. Returns an animation."""
+    return scene.camera.frame.animate.move_to(target.get_center() if hasattr(target, "get_center") else target).set(height=FRAME_H / zoom)
+
+
+def pull_out(scene):
+    return scene.camera.frame.animate.move_to(DOWN * CAP_STRIP / 2).set(height=FRAME_H)
+
+
+def spotlight(mob, others, dim=0.75, color=ACCENT):
+    """Dim everything else and ring the thing that matters now. Returns an animation."""
+    return AnimationGroup(*[o.animate.fade(dim) for o in others], Circumscribe(mob, color=color, buff=0.08))
+
+
 # ---------- the beat-synced scene ----------
 _DUR = None
 
@@ -264,8 +338,8 @@ class Beat(MovingCameraScene):
         self.spec = _DUR[self.SCENE_ID]["beats"]
         self.cap = None
         self.camera.frame.set(height=FRAME_H).move_to(DOWN * CAP_STRIP / 2)
-        self.strip = Rectangle(width=FRAME_H * 16 / 9 + 0.1, height=CAP_STRIP + 0.05, fill_color="#07080a", fill_opacity=1,
-                               stroke_width=0).move_to(DOWN * (4 + CAP_STRIP / 2)).set_z_index(40)
+        self.strip = (Rectangle(width=FRAME_H * 16 / 9 + 0.1, height=CAP_STRIP + 0.05, fill_color="#07080a", fill_opacity=1,
+                                stroke_width=0).move_to(DOWN * (4 + CAP_STRIP / 2)).set_z_index(40) if CAP_STRIP else VGroup())
         self.add(self.strip)
         self.keep = [self.strip]
         if self.STEPS:
@@ -292,7 +366,7 @@ class Beat(MovingCameraScene):
         self.__dict__.setdefault("timings", []).append({"beat": i, "start": start, "audio": b["dur"]})
         if b.get("wav"):
             self.add_sound(b["wav"])
-        chunks = split_caption(b.get("caption", ""))
+        chunks = split_caption(b.get("caption", "")) if CAPTIONS == "burn" else [""]
         times = chunk_times(chunks, b["dur"])
         if self.cap is not None:
             self.remove(self.cap)

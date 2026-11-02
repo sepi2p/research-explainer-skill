@@ -1,0 +1,62 @@
+{
+ "claims": [
+  {
+   "id": "c1",
+   "statement": "Model: torchvision ResNet-18 with ImageNet weights (IMAGENET1K_V1), 1,000 classes; input 224x224x3 = 150,528 numbers.",
+   "values": [
+    "224",
+    "150,528",
+    "1,000",
+    "3"
+   ],
+   "status": "final",
+   "source": "experiments/network.py; torchvision model card",
+   "caveat": ""
+  },
+  {
+   "id": "c2",
+   "statement": "First layer: 64 learned 7x7 filters; maps go from 64 x 112x112 (conv1) to 512 x 7x7 (layer4).",
+   "values": [],
+   "status": "final",
+   "source": "assets/data.json stages",
+   "caveat": ""
+  },
+  {
+   "id": "c3",
+   "statement": "Hero photo (CC0): golden retriever 73.5%, Great Pyrenees 21.9%.",
+   "values": [],
+   "status": "final",
+   "source": "assets/data.json top5",
+   "caveat": "One photo; probabilities are the model's, not accuracy."
+  },
+  {
+   "id": "c4",
+   "statement": "Other photos: goldfish 98.4%; a tabby called Egyptian cat 35.5%; a cat called mousetrap 49.1% (wrong).",
+   "values": [],
+   "status": "final",
+   "source": "assets/data.json gallery",
+   "caveat": "Three photos; not an accuracy estimate."
+  },
+  {
+   "id": "c5",
+   "statement": "Targeted PGD (L-inf, 2/255, 40 steps) to 'goldfish': saved 8-bit image changes each value by at most 2/255 (85.1% of values changed, PSNR 44.4 dB); the model then says goldfish with more than 99.99%.",
+   "values": [
+    "2",
+    "255",
+    "99.99"
+   ],
+   "status": "final",
+   "source": "assets/data.json attack; re-checked from assets/adv.png",
+   "caveat": "White-box (attacker knows the weights), one model, one photo, digital only."
+  },
+  {
+   "id": "c6",
+   "statement": "Photos are CC0 from Wikimedia Commons, licence checked by experiments/fetch_images.py.",
+   "values": [],
+   "status": "final",
+   "source": "sources/images.json",
+   "caveat": ""
+  }
+ ],
+ "ignore_numbers": []
+}

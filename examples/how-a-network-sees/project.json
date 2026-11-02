@@ -1,0 +1,96 @@
+{
+  "title": "How a neural network sees, and how to fool it",
+  "languages": [
+    "en",
+    "fa"
+  ],
+  "source_type": "own experiment",
+  "audience": "researchers and students outside ML",
+  "voice": {
+    "mode": "none",
+    "piper": {
+      "en": "en_US-lessac-medium",
+      "fa": "fa_IR-gyro-medium"
+    },
+    "openai": {
+      "model": "gpt-audio-1.5",
+      "voice": "marin",
+      "instructions": {}
+    }
+  },
+  "reading_cps": {
+    "en": 15,
+    "fa": 12
+  },
+  "keep_latin": [
+    "ImageNet",
+    "ResNet-18",
+    "PGD",
+    "PSNR",
+    "experiments/network.py",
+    "RGB",
+    "R",
+    "G",
+    "B",
+    "PSNR 44.4 dB",
+    "conv1",
+    "layer1",
+    "layer2",
+    "layer3",
+    "layer4"
+  ],
+  "pronounce": {
+    "en": {},
+    "fa": {}
+  },
+  "palette": {},
+  "scenes": [
+    {
+      "id": "s00_title",
+      "file": "scenes/main.py",
+      "class": "S00Title"
+    },
+    {
+      "id": "s01_pixels",
+      "file": "scenes/main.py",
+      "class": "S01Pixels"
+    },
+    {
+      "id": "s02_filters",
+      "file": "scenes/main.py",
+      "class": "S02Filters"
+    },
+    {
+      "id": "s03_layers",
+      "file": "scenes/main.py",
+      "class": "S03Layers"
+    },
+    {
+      "id": "s04_decision",
+      "file": "scenes/main.py",
+      "class": "S04Decision"
+    },
+    {
+      "id": "s05_saliency",
+      "file": "scenes/main.py",
+      "class": "S05Saliency"
+    },
+    {
+      "id": "s06_gallery",
+      "file": "scenes/main.py",
+      "class": "S06Gallery"
+    },
+    {
+      "id": "s07_attack",
+      "file": "scenes/main.py",
+      "class": "S07Attack"
+    },
+    {
+      "id": "s08_close",
+      "file": "scenes/main.py",
+      "class": "S08Close"
+    }
+  ],
+  "slug": "how_a_network_sees",
+  "captions": "srt"
+}

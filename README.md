@@ -4,11 +4,12 @@
 
 A skill for Claude Code that turns research into a **3Blue1Brown-style explainer video**, and optionally a matching slide
 deck, in **English and/or Persian (Farsi)**. Every number on screen is traced to a source, and every data image comes from a
-real run.
+real run. The story is told visually: things move, split, stack and transform; words are labels, and voice and subtitles
+are optional layers.
 
-| English, free offline voice | Persian, text only |
+| A real network's filter sweeping a photo (English) | The same network fooled by a 2/255 change (Persian) |
 |---|---|
-| ![English demo frame](docs/demo_en.png) | ![Persian demo frame](docs/demo_fa.png) |
+| ![English demo frame](docs/net_en.png) | ![Persian demo frame](docs/net_fa.png) |
 
 ## What it does
 
@@ -20,11 +21,13 @@ You say *"make an explainer video of my paper"* (or your experiments, or a set o
    / planned / reported from another paper) and its source (page and table, or file and run).
 3. **Makes the figures from real data:** your code, your logs, or small new experiments. Each image is registered with the
    script, seed and hash that produced it.
-4. **Plans the scenes** in the 3Blue1Brown style and shows you the plan before writing any animation.
-5. **Builds the video** with Manim. The build stops if any number in the narration is missing from the ledger or the
-   measured data.
-6. Delivers `video.mp4`, a small copy for messaging apps, and subtitles (`.srt`). It can also make **slides** from the same
-   claims and images.
+4. **Plans the scenes** in the 3Blue1Brown style, beat by beat by what moves, and shows you the plan before writing any
+   animation.
+5. **Checks and builds** the video with Manim. `rx.py claims` fails if any number in the narration is missing from the
+   ledger or the measured data; the agent runs it before building.
+6. Delivers `video.mp4`, a small copy for messaging apps, and subtitles (`.srt`, or burned in if you ask). It can also make
+   **slides** from the same claims and images, and a 20-30 s **launch video** (`rx.py promo`: motion graphics, music,
+   sound effects).
 
 ### Voice options
 | option | cost | notes |
@@ -97,10 +100,21 @@ Open Claude Code in the folder with your paper or project and ask, for example:
 Claude asks its questions and shows you the claims ledger and the scene plan before it builds. Outputs land in the
 project's `build/` folder.
 
-## Try the demo
+## Try the demos
+
+`examples/how-a-network-sees/` (1.5 min, EN + FA): a pretrained ImageNet classifier (ResNet-18) on CC0 photos. Pixels,
+its 64 learned filters sweeping the image, feature maps layer by layer, the prediction, where it looks, and a change of at
+most 2/255 per pixel that turns a golden retriever into a goldfish. Two scripts make every image and number: one downloads
+the photos after checking their CC0 licence, one runs the network.
+
+```bash
+cd examples/how-a-network-sees
+python3 experiments/fetch_images.py && python3 experiments/network.py   # needs torch + torchvision (CPU is fine)
+python3 ../../skills/research-explainer/scripts/rx.py build en --quality l
+```
 
 `examples/averaging-noise/` is a 1-minute video built from a tiny real experiment ("why averaging removes noise", including
-its limit when the noise is correlated).
+its limit when the noise is correlated). It needs only numpy, and `rx.py selftest` builds it.
 
 ```bash
 cd examples/averaging-noise
@@ -117,7 +131,8 @@ skills/research-explainer/      the skill: SKILL.md, references/, scripts/rx.py 
 skills/manim-composer/          scene planning (bundled, MIT, by Adithya S Kolavi)
 skills/manimce-best-practices/  Manim CE coding (bundled, MIT, by Adithya S Kolavi)
 skills/manimgl-best-practices/  ManimGL (optional, CC BY-NC-SA 4.0, by Adithya S Kolavi after 3Blue1Brown)
-examples/averaging-noise/       demo project
+examples/how-a-network-sees/    demo: a neural network, real filters and maps, an adversarial example
+examples/averaging-noise/       small demo, used by rx.py selftest
 .claude-plugin/                 Claude Code plugin + marketplace manifests
 .codex-plugin/, .agents/         OpenAI Codex / ChatGPT plugin + marketplace manifests
 install.sh, AGENTS.md           installation for people and for agents

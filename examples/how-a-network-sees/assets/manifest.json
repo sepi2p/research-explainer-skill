@@ -1,0 +1,409 @@
+{
+ "assets": [
+  {
+   "file": "adv.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "acefd5f0f895739a20ccbfaed377e9649c1fee58e890bb23bc9b1e3fad7f4eb7",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "delta.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "f96186c4ba204bcd54f39a47b670b6d062b063ccdc0fe093d9361456a86ea735",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "filter_21.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "bbfd4f77d4d6d1f1e47cee495d5acc862eb7c5130841dc18658d7cb423d66ebb",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "filter_28.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "ee7639bbf897fa3f4c0070a7edd2ccf6280bf12ae0e42be83912d1db5e5f94d9",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "filter_52.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "f1a97cac717fd40efccc95308e393d4c9bc47a3e4ec9bf0b2a3302f09d243159",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "filters.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "e04816e1fea693ed801b43c193a3b4f63a077810d07f0785896d3d5d864d0498",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "fmap_conv1_21.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "7683384dc7a64627496e1195bf63d450add4e5d9300ca3bcac949aa15b426604",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "fmap_conv1_28.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "7d26291c379ec61cfa3a04d1abea5daf731d3e47c95ad54129253b8b922022ba",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "fmap_conv1_52.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "7eae7df9c9dbbe8ffd96ad62fa96b57e0ea2c21527c85b26a7d561726ab2ad0d",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "gallery_cat.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py: 224x224 crop of a CC0 photo (sources/images.json)",
+   "note": "",
+   "sha256": "7249442d0e4cf2d06015e6dbc9a3ebd9a7eb0607051317515acb01dd68940aff",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "gallery_cat2.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py: 224x224 crop of a CC0 photo (sources/images.json)",
+   "note": "",
+   "sha256": "0bda7f13ea9ba92700e450c4f7cf8e18bd10cd56ebca3935ef37ca6d9c37024d",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "gallery_fish2.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py: 224x224 crop of a CC0 photo (sources/images.json)",
+   "note": "",
+   "sha256": "606855238dc15f4cffb0e1ff09852bedd350059790a1f6df079fb8fd505510cd",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "photo.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py: 224x224 crop of a CC0 photo (sources/images.json)",
+   "note": "",
+   "sha256": "e41f9d473cb5346fe37d6b495cd94365d4206219a494b5c48e4c45a6570e8b1b",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "saliency.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "9248a454c9294229a4117e8fed91c9a8a39524007f256a449a6fc66bfb8962ce",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_conv1_0.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "7d26291c379ec61cfa3a04d1abea5daf731d3e47c95ad54129253b8b922022ba",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_conv1_1.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "7eae7df9c9dbbe8ffd96ad62fa96b57e0ea2c21527c85b26a7d561726ab2ad0d",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_conv1_2.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "7683384dc7a64627496e1195bf63d450add4e5d9300ca3bcac949aa15b426604",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_conv1_3.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "f16da752a7829917b180b9d139f12d152f9f48fcd7cdad4537032385e92515dc",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_conv1_4.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "500570a0a5097d84b092a24fad37d5c814b5dc648110eb295741a7d69cc9b271",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_conv1_5.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "69594e6e1de1ab17f84f38f988d26893e8f678563e7a3ffa6de98c999a0834aa",
+   "date": "2026-11-02T23:32:22+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer1_0.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "c5cc65ffd98af0c4dfbee9bf911b470059e5c2ed8cf0cae8b38b5900eeadfdec",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer1_1.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "28f21e02606a504e0380dafb876cc339c1c8f056632a78472cfd6eb8bdda3f99",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer1_2.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "73551164ea67116598426b653a506a629a21662c1f3e09c74e38e9b5f0bde416",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer1_3.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "45415dbf8080d69c50866fd022b86b759f12e9b353b959ac57b29577f38e83cb",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer1_4.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "aa03d380ca7140ace579e5e7b076cd8e375f78253231387e623cdf4afb9ecd95",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer1_5.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "88ef7fcd457dab1f82ce523e46e175efdceb58e277d7daac9d692743afb71088",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer2_0.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "52fb7bceb91127a17d2713d6dce48cfba02bf99ede8a805647e5a6f069255de5",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer2_1.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "5f65fb6a3cc2af2dd327ffdc4a12f78ce2d085bd96b8259917e46ff24b44ff89",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer2_2.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "fbc32ea24b09e105ede519fecdcbcd2550b92edcb62385759488fb352231e41c",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer2_3.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "b3f79a2232b7d376860e56cb34c48fafcb9c1f179346c6a2ec9f445d1dc90caa",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer2_4.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "a25a387f306cebf924ecefbf3ba37c5ca541c48d3027ed417282439f989a2b4b",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer2_5.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "4ce569aeb23104d76f65da6e1e8ad5e6cff509bdc4f85ea99fb992170bb2fcd9",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer3_0.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "007c46f0e9b230985ec63de91a6c5910f790766b010bd6e05b1edc6699330a75",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer3_1.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "08a920b3d2f5ed19fd7cabf8bedf30e39ed37868e297c8ba66ac6650bbfa9cfa",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer3_2.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "29d93873fc8b4b06432b947028ba9e6968e23b88b2bf1ebdbd0d9a412e813dc7",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer3_3.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "5f50337e71771da76316eb0719d6b445584604253dfa95a7c3e88f5879ea2b5b",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer3_4.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "52d622755c5ac0306320afb15e8ba79d717e828cfac82bcb15c0f2d3aa994cde",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer3_5.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "d2d80eac0ebfcf48df380037b32cf8a15fecb3ee35960965acc5860f16db4e81",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer4_0.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "ef07ad45646e0022258b7da7e8e96fd303aeb9204e7ac7af8aece023e3723683",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer4_1.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "2575e5ee3bdcc3069160077678196fd18710ca6f0b5f39b856d603dc135eae7a",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer4_2.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "419fb5699d540a8e872383b4eafae0ac4141f367327df8436e086136ab0afe2e",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer4_3.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "eabe363b1147b91856917f16f6a2d95c1da2fb3adf7d8bf11898f262bf9fbb51",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer4_4.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "96fea41b3008fd6e5363ba7a6e3ac7808db865ce23c1c98e28a6b68387312c07",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "stage_layer4_5.png",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "78730c2fd8470e97af137995b71c5e1fd87275af66f924aa19b7d7547b51691e",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  },
+  {
+   "file": "data.json",
+   "kind": "measured",
+   "made_by": "experiments/network.py (ResNet-18 IMAGENET1K_V1, CPU, seed 0)",
+   "note": "",
+   "sha256": "1786a0fcd64f15c047e8a7c85be532b4d9bd8cc1443d49087201c27aafd3dfcd",
+   "date": "2026-11-02T23:32:23+03:30",
+   "commit": "1be9634"
+  }
+ ]
+}

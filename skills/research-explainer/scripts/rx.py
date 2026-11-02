@@ -16,12 +16,14 @@
   rx.py assemble <lang> [--voice MODE] [--quality ...] [--no-music]
   rx.py qc <lang> [--voice MODE] [--quality ...]   contact sheets: build/qc/<lang>_<mode>/<scene>.png
 
+  rx.py promo [dir] [--lang fa] [--stills 1.5,9,20]   short launch video from an HTML timeline (promo/index.html + promo.json)
+
   rx.py request "<what you wanted>" --missing ... --proposal ... [--example ...]   log a missing feature
   rx.py selftest                            build the bundled demo the way an agent would and check the outputs
 
 What each write does: `new` refuses a non-empty folder. `asset-add` replaces that file's record in assets/manifest.json.
 `durations` replaces build/durations_<lang>_<mode>.json; voice clips are kept and re-made only for beats whose text changed.
-`render` replaces that scene's video. `assemble` replaces the final mp4/srt. `request` appends to feature_requests.md.
+`render` replaces that scene's video. `assemble` replaces the final mp4/srt. `promo` replaces <dir>/promo.mp4 and promo.jpg. `request` appends to feature_requests.md.
 Nothing is ever uploaded or published.
 
 Run from the project folder (or set EXPLAINER_PROJECT). Outputs land in build/.
@@ -138,6 +140,8 @@ def cmd_check(a):
     line("(optional) OpenAI key (paid voice/images)", key, "(~/.config/openai/key, chmod 600; contents not shown)")
     gpu = shutil.which("nvidia-smi") and sh("nvidia-smi --query-gpu=name --format=csv,noheader", capture_output=True, text=True).stdout.strip()
     line("(optional) GPU for experiments", gpu, gpu or "")
+    promo_ok = shutil.which("node") and (SKILL / "promo" / "node_modules" / "playwright").exists()
+    line("(optional) launch-video engine (node + Playwright)", promo_ok, f"(cd {SKILL / 'promo'} && npm install && npx playwright install chromium)")
     print("ready" if ok else "missing required tools above")
     return 0 if ok else 1
 
@@ -423,8 +427,10 @@ def cmd_durations(a, mode=None, dry=False):
             beats = []
             for i, b in enumerate(s["beats"]):
                 cap = b.get("text", b.get("caption", ""))   # "text": an optional shorter caption for text-only videos
-                read = len(cap) / cps + 1.5 if cap.strip() else 0
-                beats.append({"dur": round(max(read, anim[s["id"]][i] + 0.8, b.get("min_dur", 0)), 2), "caption": cap})
+                # burned captions: long enough to read; otherwise the picture sets the pace (animation + a short hold)
+                read = (len(cap) / cps + 1.5 if cap.strip() else 0) if CONF.get("captions", "srt") == "burn" else 0
+                hold = b.get("hold", 0.8)
+                beats.append({"dur": round(max(read, anim[s["id"]][i] + hold, b.get("min_dur", 0)), 2), "caption": cap})
             out["scenes"].append({"id": s["id"], "beats": beats})
         f = dur_file(lang, mode)
     else:
@@ -572,7 +578,7 @@ def cmd_assemble(a):
         "-movflags", "+faststart", str(share)], check=True)
     write_srt(lang, mode, sc, lens, BUILD / f"{name}.srt")
     mb = lambda p: p.stat().st_size / 1e6
-    print(f"{out.name}: {total / 60:.0f}:{total % 60:04.1f}, {mb(out):.1f} MB; {share.name}: {mb(share):.1f} MB (for messaging); {name}.srt")
+    print(f"{out.name}: {int(total // 60)}:{total % 60:04.1f}, {mb(out):.1f} MB; {share.name}: {mb(share):.1f} MB (for messaging); {name}.srt")
 
 
 def write_srt(lang, mode, sc, lens, path):
@@ -625,6 +631,73 @@ def cmd_qc(a):
 
 
 # ---------------- build ----------------
+def cmd_promo(a):
+    """Render an HTML motion-graphics page frame by frame (promo/render.mjs, headless Chromium), mix music + sound effects
+    from promo.json, bake the poster as frame 0. See references/promo.md."""
+    d = (ROOT / a.dir).resolve()
+    conf = load_json(d / "promo.json", None)
+    if conf is None:
+        die(f"no {d}/promo.json", "copy templates/promo/ into the project (see references/promo.md)")
+    eng = SKILL / "promo"
+    if not shutil.which("node"):
+        die("node is not installed", "install Node.js 18+ (https://nodejs.org), then: cd " + str(eng) + " && npm install")
+    if not (eng / "node_modules" / "playwright").exists():
+        die("the promo engine needs Playwright", f"cd {eng} && npm install && npx playwright install chromium")
+    page = d / conf.get("page", "index.html")
+    dur, fps = float(conf["duration"]), int(conf.get("fps", 30))
+    W, H = int(conf.get("width", 1280)), int(conf.get("height", 720))
+    work = d / "work"
+    work.mkdir(exist_ok=True)
+    q = ["--query", f"?lang={a.lang}"] if a.lang else []
+    suf = f"_{a.lang}" if a.lang else ""
+    base = ["node", str(eng / "render.mjs"), str(page)]
+    if a.stills:
+        sh(base + ["-"] + q + ["--stills", a.stills, "--stills-dir", str(work / f"stills{suf}"), "--width", str(W), "--height", str(H)], check=True, cwd=d)
+        print("stills in", work / f"stills{suf}")
+        return
+    silent = work / f"video{suf}.mp4"
+    sh(base + [str(silent)] + q + ["--duration", str(dur), "--fps", str(fps), "--width", str(W), "--height", str(H)], check=True, cwd=d)
+    # audio: music from an offset, sound-effect cues at their times, then loudness to -14 LUFS (typical for social video)
+    ins, parts = [], []
+    m = conf.get("music")
+    if m and not a.no_music:
+        mf = pathlib.Path(m["file"]).expanduser()
+        if not mf.is_absolute():
+            mf = d / mf
+        if not mf.exists():
+            die(f"music file not found: {mf}", "set music.file in promo.json to a track you may use (see references/promo.md)")
+        ins += ["-ss", str(m.get("start", 0)), "-i", str(mf)]
+        fo = float(m.get("fade_out", 1.5))
+        parts.append(f"[{len(parts)}:a]atrim=0:{dur},asetpts=N/SR/TB,afade=t=out:st={dur - fo}:d={fo},volume={m.get('gain_db', 0)}dB[a{len(parts)}]")
+    for c in conf.get("sfx", []):
+        f = pathlib.Path(c["file"]) if "/" in c["file"] else SKILL / "assets" / "sfx" / (c["file"] + ".ogg")
+        if not f.is_absolute():
+            f = d / f
+        if not f.exists():
+            die(f"sound effect not found: {f}", "use a name from assets/sfx/README.md or a path to your own file")
+        k = len(parts)
+        ms = int(float(c["t"]) * 1000)
+        ins += ["-i", str(f)]
+        parts.append(f"[{k}:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay={ms}|{ms},volume={c.get('gain_db', -10)}dB[a{k}]")
+    out = d / f"promo{suf}.mp4"
+    poster_t = float(conf.get("poster", dur - 1.5))
+    poster = d / f"promo{suf}.jpg"
+    sh(["ffmpeg", "-v", "error", "-y", "-ss", str(poster_t), "-i", str(silent), "-frames:v", "1", "-q:v", "2", str(poster)], check=True)
+    vf = "[0:v][1:v]overlay=enable='eq(n,0)'[v]"   # poster as frame 0 (the thumbnail), same length
+    if parts:
+        n = len(parts)
+        mix = ";".join(p_.replace(f"[{i}:a]", f"[{i + 2}:a]") for i, p_ in enumerate(parts))
+        mix += ";" + "".join(f"[a{i}]" for i in range(n)) + f"amix=inputs={n}:duration=longest:normalize=0,atrim=0:{dur},alimiter=limit=0.9," \
+               "loudnorm=I=-14:TP=-1.5:LRA=9[a]"
+        sh(["ffmpeg", "-v", "error", "-y", "-i", str(silent), "-i", str(poster)] + ins +
+           ["-filter_complex", vf + ";" + mix, "-map", "[v]", "-map", "[a]", "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-movflags", "+faststart", "-t", str(dur), str(out)], check=True)
+    else:
+        sh(["ffmpeg", "-v", "error", "-y", "-i", str(silent), "-i", str(poster), "-filter_complex", vf, "-map", "[v]",
+            "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(out)], check=True)
+    print(f"{out.name}: {dur:.1f}s, {out.stat().st_size / 1e6:.1f} MB; poster {poster.name} (t={poster_t}s)")
+
+
 def cmd_build(a):
     if voice_mode(a) == "none":
         cmd_render(a, dry=True)
@@ -644,6 +717,9 @@ def main():
     p = sub.add_parser("new"); p.add_argument("dir"); p.add_argument("--title"); p.add_argument("--langs", default="en")
     p.add_argument("--voice", default="none", choices=["none", "piper", "manual", "openai"])
     sub.add_parser("claims"); sub.add_parser("assets")
+    p = sub.add_parser("promo"); p.add_argument("dir", nargs="?", default="promo"); p.add_argument("--stills", default="")
+    p.add_argument("--lang", default="", help="passed to the page as ?lang=..; outputs promo_<lang>.mp4")
+    p.add_argument("--no-music", action="store_true")
     p = sub.add_parser("asset-add"); p.add_argument("file"); p.add_argument("--kind", required=True, choices=["measured", "reported", "illustration", "generated"])
     p.add_argument("--by", required=True); p.add_argument("--note", default="")
     for name in ("strings", "voice-script", "durations", "render", "assemble", "qc", "build"):
@@ -654,7 +730,7 @@ def main():
         p.add_argument("--only", nargs="*", help="durations: force these beats (scene:i) to be voiced again")
         p.add_argument("--frames", type=int, default=9)
     a = ap.parse_args()
-    fn = {"check": cmd_check, "fonts": cmd_fonts, "status": cmd_status, "request": cmd_request, "selftest": cmd_selftest, "new": cmd_new, "claims": cmd_claims, "assets": cmd_assets, "asset-add": cmd_asset_add,
+    fn = {"check": cmd_check, "fonts": cmd_fonts, "status": cmd_status, "request": cmd_request, "selftest": cmd_selftest, "new": cmd_new, "claims": cmd_claims, "promo": cmd_promo, "assets": cmd_assets, "asset-add": cmd_asset_add,
           "strings": cmd_strings, "voice-script": cmd_voice_script, "durations": cmd_durations, "assemble": cmd_assemble,
           "qc": cmd_qc, "build": cmd_build}.get(a.cmd)
     if a.cmd == "render":
