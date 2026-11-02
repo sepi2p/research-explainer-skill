@@ -71,6 +71,17 @@ cd research-explainer-skill
 Flags: `--project` installs into the current project's `.claude/skills` only. `--no-gl` skips the optional ManimGL skill,
 which has a non-commercial licence. `--codex` installs into `~/.agents/skills` for OpenAI Codex (untested).
 
+**Option C: OpenAI Codex / ChatGPT desktop.**
+```bash
+codex plugin marketplace add sepi2p/research-explainer-skill
+codex plugin add research-explainer@research-explainer-skill
+```
+(or `./install.sh --codex`). Then ask Codex for a video, or call the skill with `$research-explainer`. In the ChatGPT
+desktop app, add the same marketplace and install the plugin from the Plugins directory (not tested yet).
+
+**ChatGPT on the web or mobile** cannot run Manim, so there the skill only plans: the questions, the claims ledger, the
+scene plan, the narration and the scene code. You render on your computer with any of the options above.
+
 **Having an AI agent install it?** Point it at [AGENTS.md](AGENTS.md).
 
 ## Use
@@ -108,12 +119,16 @@ skills/manimce-best-practices/  Manim CE coding (bundled, MIT, by Adithya S Kola
 skills/manimgl-best-practices/  ManimGL (optional, CC BY-NC-SA 4.0, by Adithya S Kolavi after 3Blue1Brown)
 examples/averaging-noise/       demo project
 .claude-plugin/                 Claude Code plugin + marketplace manifests
+.codex-plugin/, .agents/         OpenAI Codex / ChatGPT plugin + marketplace manifests
 install.sh, AGENTS.md           installation for people and for agents
 ```
 
 ## Status and limits
-- Tested with Claude Code on Linux (Manim CE 0.22). macOS should work. Windows is untested (WSL is recommended).
-- Other agents that read `SKILL.md` folders may work, but they are untested.
+- Tested with Claude Code on Linux (Manim CE 0.22): plugin install, full builds, `rx.py selftest`.
+- Codex CLI 0.154: plugin install tested (all four skills found). A full video made by Codex has not been tested yet.
+- macOS should work. Windows is untested (WSL is recommended).
+- Missing something? `rx.py request ...` logs it, or open an [issue](https://github.com/sepi2p/research-explainer-skill/issues/new/choose).
+  What changed: [CHANGELOG.md](CHANGELOG.md).
 - The skill makes the work faster and keeps it checkable. It does not replace the authors' review: watch the video and
   read the claims ledger before you share it.
 

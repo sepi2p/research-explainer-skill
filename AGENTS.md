@@ -42,11 +42,32 @@ download larger than about 500 MB.
 8. Tell the user it is installed and that a **new Claude Code session** is needed for the skill to appear. Then tell them
    how to start: "make an explainer video of <paper/project>".
 
+## Install (OpenAI Codex CLI / IDE, ChatGPT desktop app)
+
+Steps 1-3 above (system tools, Manim) are the same. Then either:
+- plugin: `codex plugin marketplace add sepi2p/research-explainer-skill` and
+  `codex plugin add research-explainer@research-explainer-skill`. In the ChatGPT desktop app, add the same marketplace and
+  install the plugin from the Plugins directory (not tested yet).
+- or copy the skills: `./install.sh --codex` (into `~/.agents/skills`; restart Codex).
+
+Then `python3 <skill dir>/scripts/rx.py fonts` and `rx.py check`. In Codex the skill is invoked with `$research-explainer`
+(or implicitly when the user asks for an explainer video). `${CLAUDE_SKILL_DIR}` in SKILL.md means the folder that contains
+SKILL.md; substitute that path yourself if your agent does not.
+
+## ChatGPT on the web or mobile
+
+There is no local shell there, so Manim and FFmpeg cannot run. The skill still works for planning: intake, claims ledger,
+scene plan, narration and scene code. Rendering needs Claude Code, Codex, or the ChatGPT desktop app. Say so to the user;
+never claim a video was rendered.
+
 ## Use
 
 Load `skills/research-explainer/SKILL.md` and follow it. In short: intake questions, then the claims ledger, real
 assets, a scene plan the user approves, narration and scenes, `rx.py build`, contact-sheet review, and delivery.
 Accuracy rules are in `references/accuracy.md`; follow them strictly.
+
+Start with `rx.py status` in the project folder. If something the user needs is missing, log it with `rx.py request`
+(see SKILL.md) instead of silently working around it.
 
 ## Troubleshooting
 | symptom | fix |
@@ -56,3 +77,13 @@ Accuracy rules are in `references/accuracy.md`; follow them strictly.
 | scene fails only during parallel renders | rx.py retries it alone automatically; if it persists, run with `JOBS=1` |
 | `MathTex` errors | LaTeX is missing: install it, or use `T()` text instead |
 | Persian label still in English | `rx.py strings fa`, then add it to `strings_fa.json` |
+
+## For maintainers (and agents changing this repo)
+- Every new feature updates `skills/research-explainer/SKILL.md` (or the relevant reference file) and `CHANGELOG.md`
+  in the same commit, or agents will not know it exists.
+- Error messages say what to do (`ERROR: ... / FIX: ...`). Accept common wrong names where it is cheap.
+- Before pushing: `python3 skills/research-explainer/scripts/rx.py selftest` must print PASS, and `claude plugin validate .`
+  must pass.
+- Keep outputs short: commands print one line per item and a next step, not whole files.
+- Never commit unpublished research data, private paths, or keys. Examples use public or synthetic data only.
+- Answer feature-request issues with the steps to use the new feature, then close them.

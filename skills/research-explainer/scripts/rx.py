@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """rx: build research explainer videos from a project folder (see SKILL.md).
 
+  rx.py status [lang]                       short outline of the project and the next step (start here)
   rx.py check                               tools, fonts, voices, GPU, API key present (never printed)
   rx.py fonts                               install the bundled Inter and Vazirmatn fonts for this user
   rx.py new <dir> [--title T] [--langs en,fa] [--voice none|piper|manual|openai]
@@ -14,6 +15,14 @@
   rx.py render <lang> [--voice MODE] [--quality l|m|h] [--scenes ID ...] [--dry]
   rx.py assemble <lang> [--voice MODE] [--quality ...] [--no-music]
   rx.py qc <lang> [--voice MODE] [--quality ...]   contact sheets: build/qc/<lang>_<mode>/<scene>.png
+
+  rx.py request "<what you wanted>" --missing ... --proposal ... [--example ...]   log a missing feature
+  rx.py selftest                            build the bundled demo the way an agent would and check the outputs
+
+What each write does: `new` refuses a non-empty folder. `asset-add` replaces that file's record in assets/manifest.json.
+`durations` replaces build/durations_<lang>_<mode>.json; voice clips are kept and re-made only for beats whose text changed.
+`render` replaces that scene's video. `assemble` replaces the final mp4/srt. `request` appends to feature_requests.md.
+Nothing is ever uploaded or published.
 
 Run from the project folder (or set EXPLAINER_PROJECT). Outputs land in build/.
 """
@@ -52,17 +61,49 @@ def voice_mode(a):
 
 
 def scenes_conf():
+    if not CONF:
+        die(f"no project.json in {ROOT}", "run rx.py from the project folder, or: rx.py new <dir>")
     sc = CONF.get("scenes", [])
-    assert sc, "project.json has no scenes"
+    if not sc:
+        die("project.json has no scenes", 'add "scenes": [{"id": "s01_hook", "file": "scenes/main.py", "class": "S01Hook"}] in playing order')
+    for s in sc:
+        miss = [k for k in ("id", "file", "class") if k not in s]
+        if miss:
+            die(f"scene entry {s} lacks {miss}", 'each entry needs "id" (narration id), "file" (path to .py), "class" (Beat subclass)')
+        if not (ROOT / s["file"]).exists():
+            die(f"scene file {s['file']} not found", f"create it or fix \"file\" for scene {s['id']} in project.json")
     return sc
 
 
+ALIASES = {"say": ("narration", "voice", "spoken", "speech", "script"), "caption": ("subtitle", "on_screen", "onscreen", "display"),
+           "text": ("text_only", "short", "silent_caption")}
+
+
+def die(msg, fix):
+    sys.exit(f"ERROR: {msg}\nFIX: {fix}")
+
+
 def narration(lang):
-    n = load_json(narration_file(lang))
-    assert n, f"missing {narration_file(lang).name}"
+    import difflib
+    f = narration_file(lang)
+    n = load_json(f)
+    if not n:
+        die(f"{f.name} not found in {ROOT}", f"create it (see templates/project/narration_{'fa' if lang == 'fa' else 'en'}.json), or check the language code")
+    if "scenes" not in n:
+        die(f"{f.name} has no top-level \"scenes\" list", '{"scenes": [{"id": "s01_hook", "beats": [{"say": "...", "caption": "..."}]}]}')
+    for sc in n["scenes"]:
+        for b in sc.get("beats", []):
+            for field, alts in ALIASES.items():   # accept common wrong names, and say so
+                for alt in alts:
+                    if alt in b and field not in b:
+                        b[field] = b.pop(alt)
+                        print(f"note: {f.name} {sc['id']}: field \"{alt}\" read as \"{field}\" (please rename)")
     ids = [s["id"] for s in n["scenes"]]
-    missing = [s["id"] for s in scenes_conf() if s["id"] not in ids]
-    assert not missing, f"scenes without narration in {narration_file(lang).name}: {missing}"
+    for s in scenes_conf():
+        if s["id"] not in ids:
+            near = difflib.get_close_matches(s["id"], ids, 1)
+            die(f"scene {s['id']} (project.json) has no narration in {f.name}",
+                f"did you mean \"{near[0]}\"? Use the same id in both files." if near else f"add a scene with \"id\": \"{s['id']}\" to {f.name}")
     return n
 
 
@@ -112,6 +153,91 @@ def cmd_fonts(a):
     if shutil.which("fc-cache"):
         sh(["fc-cache", "-f"], capture_output=True)
     print(f"installed {n} font files into {dest}")
+
+
+# ---------------- status ----------------
+def cmd_status(a):
+    """A compact outline: what exists, what is missing, and the next command."""
+    if not CONF:
+        print(f"no project here ({ROOT}). Next: rx.py new <dir> --title ... --langs en,fa --voice none"); return
+    langs = CONF.get("languages", ["en"])
+    print(f"project: {CONF.get('title')} | languages {','.join(langs)} | voice {CONF.get('voice', {}).get('mode', 'none')} | {ROOT}")
+    cl = load_json(ROOT / "claims.json", {"claims": []})["claims"]
+    man = load_json(ASSETS / "manifest.json", {"assets": []})["assets"]
+    print(f"claims: {len(cl)} ({', '.join(sorted({c.get('status', '?') for c in cl}))}) | assets registered: {len(man)}")
+    nxt = []
+    if not (ROOT / "scenes.md").exists() or "(paper / papers / own work)" in (ROOT / "scenes.md").read_text():
+        nxt.append("write scenes.md and get the user's approval")
+    for lang in ([a.lang] if getattr(a, "lang", None) else langs):
+        n = load_json(narration_file(lang))
+        if not n:
+            print(f"  {lang}: no narration_{lang}.json"); nxt.append(f"write narration_{lang}.json"); continue
+        nb = {s["id"]: len(s["beats"]) for s in n["scenes"]}
+        mode = CONF.get("voice", {}).get("mode", "none")
+        row = []
+        for s in CONF.get("scenes", []):
+            v = scene_video(s, lang, mode, "m")
+            row.append(f"{s['id']}({nb.get(s['id'], '?')} beats{', rendered' if v.exists() else ''})")
+        print(f"  {lang}: " + " ".join(row))
+        outs = sorted(p.name for p in BUILD.glob(f"*_{lang}_*.mp4") if not p.name.endswith("_share.mp4")) if BUILD.exists() else []
+        print(f"  {lang} outputs: {', '.join(outs) or 'none yet'}")
+        if not outs:
+            nxt.append(f"rx.py claims && rx.py build {lang}")
+    reqs = ROOT / "feature_requests.md"
+    if reqs.exists():
+        print(f"open feature requests: {reqs.read_text().count('## ')} (feature_requests.md)")
+    print("next: " + ("; ".join(nxt) if nxt else "review build/qc contact sheets, then deliver"))
+
+
+def cmd_request(a):
+    """Record something the skill could not do, so the maintainers can add it."""
+    f = ROOT / "feature_requests.md"
+    when = sh(["date", "-Iseconds"], capture_output=True, text=True).stdout.strip()
+    block = (f"## {a.wanted}\n- date: {when}\n- missing: {a.missing}\n- proposal: {a.proposal}\n"
+             + (f"- example: {a.example}\n" if a.example else "") + "\n")
+    with open(f, "a") as fh:
+        fh.write(block)
+    print(f"logged in {f}")
+    print("To send it to the maintainers (only with the user's OK): open an issue at "
+          "https://github.com/sepi2p/research-explainer-skill/issues/new?template=feature_request.md and paste the block.")
+
+
+def cmd_selftest(a):
+    """Build the bundled demo at low quality in a temporary copy, the way an agent would, and check every output."""
+    import tempfile
+    demo = SKILL.parent.parent / "examples" / "averaging-noise"
+    if not demo.exists():
+        sys.exit(f"demo not found at {demo} (selftest needs the full repository or plugin folder)")
+    tmp = pathlib.Path(tempfile.mkdtemp(prefix="rx_selftest_"))
+    shutil.copytree(demo, tmp / "demo", ignore=shutil.ignore_patterns("build"))
+    rx = [sys.executable, str(HERE / "rx.py")]
+    env = dict(os.environ, EXPLAINER_PROJECT=str(tmp / "demo"))
+    ok = True
+
+    def step(name, args, expect=0, contains=None):
+        nonlocal ok
+        r = subprocess.run(rx + args, cwd=tmp / "demo", env=env, capture_output=True, text=True)
+        out = r.stdout + r.stderr
+        good = r.returncode == expect and (contains is None or contains in out)
+        ok &= good
+        print(f"[{'ok' if good else 'FAIL'}] {name}" + ("" if good else f"\n{out[-1500:]}"))
+    step("claims pass", ["claims"])
+    nar = tmp / "demo" / "narration_en.json"
+    orig = nar.read_text()
+    nar.write_text(orig.replace("0.125", "0.115", 1))
+    step("claims catch a wrong number", ["claims"], expect=1, contains="0.115")
+    nar.write_text(orig)
+    step("assets verified", ["assets"])
+    for lang in ("en", "fa"):
+        step(f"build {lang} text-only (480p)", ["build", lang, "--voice", "none", "--quality", "l"], contains=".srt")
+        step(f"no untranslated labels ({lang})", ["strings", lang], contains="no missing")
+    b = tmp / "demo" / "build"
+    for f in ("averaging_noise_en_text.mp4", "averaging_noise_fa_text.mp4", "averaging_noise_fa_text.srt"):
+        good = (b / f).exists() and (b / f).stat().st_size > 1000
+        ok &= good
+        print(f"[{'ok' if good else 'FAIL'}] output {f}")
+    print(("PASS" if ok else "FAIL") + f"  (work folder {tmp}; contact sheets in {b / 'qc'})")
+    return 0 if ok else 1
 
 
 # ---------------- new ----------------
@@ -511,7 +637,10 @@ def cmd_build(a):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("check"); sub.add_parser("fonts")
+    sub.add_parser("check"); sub.add_parser("fonts"); sub.add_parser("selftest")
+    p = sub.add_parser("status"); p.add_argument("lang", nargs="?")
+    p = sub.add_parser("request"); p.add_argument("wanted"); p.add_argument("--missing", required=True)
+    p.add_argument("--proposal", required=True); p.add_argument("--example", default="")
     p = sub.add_parser("new"); p.add_argument("dir"); p.add_argument("--title"); p.add_argument("--langs", default="en")
     p.add_argument("--voice", default="none", choices=["none", "piper", "manual", "openai"])
     sub.add_parser("claims"); sub.add_parser("assets")
@@ -525,7 +654,7 @@ def main():
         p.add_argument("--only", nargs="*", help="durations: force these beats (scene:i) to be voiced again")
         p.add_argument("--frames", type=int, default=9)
     a = ap.parse_args()
-    fn = {"check": cmd_check, "fonts": cmd_fonts, "new": cmd_new, "claims": cmd_claims, "assets": cmd_assets, "asset-add": cmd_asset_add,
+    fn = {"check": cmd_check, "fonts": cmd_fonts, "status": cmd_status, "request": cmd_request, "selftest": cmd_selftest, "new": cmd_new, "claims": cmd_claims, "assets": cmd_assets, "asset-add": cmd_asset_add,
           "strings": cmd_strings, "voice-script": cmd_voice_script, "durations": cmd_durations, "assemble": cmd_assemble,
           "qc": cmd_qc, "build": cmd_build}.get(a.cmd)
     if a.cmd == "render":

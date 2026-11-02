@@ -1,0 +1,8 @@
+interface:
+  display_name: "Research explainer"
+  short_description: "3Blue1Brown-style research videos and slides, English and Persian"
+  icon_large: "./assets/icon.png"
+  brand_color: "#ffd166"
+  default_prompt: "Make an explainer video of my paper for researchers in nearby fields."
+policy:
+  allow_implicit_invocation: true

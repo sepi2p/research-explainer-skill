@@ -21,6 +21,15 @@ Everything below happens in a **project folder** (one per video). `scripts/rx.py
 project folder: `python3 ${CLAUDE_SKILL_DIR}/scripts/rx.py <command>` (written `rx.py` below). `${CLAUDE_SKILL_DIR}` is the
 folder that contains this SKILL.md; if your agent does not substitute it, use that folder's path.
 
+**Start every session with `rx.py status`** in the project folder: a short outline of what exists and the next step.
+
+### If you cannot run commands
+Some surfaces (for example ChatGPT on the web or mobile) cannot run Manim or FFmpeg. Then do everything that needs no
+rendering: intake (1), the claims ledger (3), scenes.md (5), narration and scene code (6), packed as a project folder the
+user can download. Tell the user plainly that rendering needs a computer with Claude Code, Codex, or the ChatGPT desktop
+app (which runs Codex locally), and give the command: `rx.py build <lang> --voice <mode>`. Never describe a video as made
+when it was not rendered.
+
 ## 0. Setup check (first time only)
 
 Run `rx.py check`. Required: manim, ffmpeg, fonts Inter + Vazirmatn. Optional: LaTeX, piper, OpenAI key, GPU. If fonts
@@ -117,6 +126,7 @@ which claims (ids) and assets it uses. **Show scenes.md to the user and wait for
 ## 7. Build
 
 ```
+rx.py status                         # where the project stands, next step
 rx.py claims                         # every number has a source; fix all ERRORs
 rx.py assets                         # every asset registered and unchanged
 rx.py render <lang> --quality l      # quick preview render (480p) while coding; then rx.py qc <lang>
@@ -144,6 +154,13 @@ voices in [references/voice.md](references/voice.md).
 Same ledger, same assets, same order. See [references/slides.md](references/slides.md): a Slides artifact when the
 environment offers one, otherwise `templates/deck.html` (a single HTML file, right-to-left ready, prints to PDF) or a
 .pptx via a pptx skill.
+
+## When the skill cannot do something
+
+If a user needs something the pipeline lacks (a chart type, a layout, a voice, a format), do it by hand if you can, and
+log it: `rx.py request "<what you wanted>" --missing "<what is missing>" --proposal "<how it could work>" --example "<a
+concrete case>"`. Tell the user it was logged in feature_requests.md, and that with their OK it can be sent as a GitHub
+issue to the maintainers. Never open the issue without their OK.
 
 ## Working style
 

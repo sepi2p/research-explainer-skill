@@ -3,7 +3,10 @@
 ## Commands (run in the project folder)
 | command | does |
 |---|---|
-| `rx.py check` | tools, fonts, optional voice/GPU/key |
+| `rx.py status [lang]` | short outline of the project and the next step |
+| `rx.py check` / `rx.py fonts` | tools, fonts, optional voice/GPU/key / install bundled fonts |
+| `rx.py request ...` | log a missing feature in feature_requests.md |
+| `rx.py selftest` | build the demo (en+fa, 480p) and check all outputs |
 | `rx.py new DIR --title T --langs en,fa --voice MODE` | project skeleton from templates/project |
 | `rx.py claims` / `rx.py assets` | accuracy gates (numbers have sources; assets registered and unchanged) |
 | `rx.py render LANG [--quality l/m/h] [--scenes ids] [--dry]` | parallel Manim renders (JOBS=4 by default) |
