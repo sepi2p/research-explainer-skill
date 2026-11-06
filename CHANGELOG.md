@@ -3,6 +3,35 @@
 Newest first. Agents: read this after an update to learn new commands; every feature lands here and in SKILL.md in the
 same commit.
 
+## 0.6.0 (2026-11-07)
+
+- Diorama template, sound: `work/probe_motion.mjs` (with `work/probe_hooks.js`) steps through the whole video at 15
+  samples a second without drawing and writes `work/audio/motion_events.json`: paper components appearing (slips,
+  torn paper, stickies, stamps, term cards, chips, bubbles, marks, plots and their timed points and lines), ribbon pins,
+  camera moves and the rung climb into each scene. Things already on screen when a shot arrives get no event. Playwright
+  comes from the skill, as in `render_seg.mjs`; 4 browser pages by default, about 5 s for the demo.
+- `work/audio.py` turns those events into quiet automatic sounds where the hand-placed SFX table has none (within
+  0.22 s of a hand cue: left to it; at most 10 a second; quick runs become soft rising ticks; camera moves of at least
+  0.4 s get a whoosh). No events file: nothing changes. New library sounds `wood()` and `bonk()`.
+- `work/assemble.py`: after the two-pass loudnorm, a 4x-oversampled limiter at −2 dBFS, so the encoded file stays at or
+  under −1 dBTP at −14 LUFS; it prints loudness and true peak. An optional third argument picks another soundtrack.
+- `work/srt.py`: cues longer than 42 characters go onto two lines (broken at the space nearest the middle); an empty
+  `DIGITS` list of (spoken phrase, digits) pairs, applied to subtitles only, for a project to fill in.
+
+- Diorama template, original music (`references/music-diorama.md`, the brief): `work/measure_voice.py` measures the
+  narrator (f0 p5/median/p95, LTAS octave shares and centroid, pauses per minute, words per minute) and derives the
+  no-sustain zone, the voice body band and the speech spans → `work/music/voice_profile.json`. `work/make_cuemap.py`
+  builds `work/music/cuemap.json` (sections per scene and function, hits, dropouts) from the timeline and the SFX cues,
+  with a CONFIG block for asides, dry lines, holds, calls to action, outro, teaser and recap. `work/music.py` composes
+  a warm chamber score with the Lemo-Opuscar sampler (CC0 samples): one free-running grid per chapter, written 2-bar
+  contoured figures instead of a random walk, composed phrases in pauses of 1.5 s or more, register rules from the
+  voice profile, chord plans checked for cross-relations, motifs M1-M3, the brief's lint and checks, per-chapter
+  parallel render with 1 s crossfades, section levels set to the energy plan; deterministic (SEED). Writes
+  `work/music/score.wav` (exact length, unducked), stems, `credits.txt` and `score_meta.json`.
+- `work/audio.py` uses `work/music/score.wav` when it exists (in stereo, normalised to its reference bed, then the
+  same ducking as a bed); `bed.*` stays the fallback. With a voice and music it prints voice minus music under
+  speech (median, p5, and at 1-4 kHz).
+
 ## 0.5.0 (2026-11-06)
 
 - Watercolor story shorts (`references/style-watercolor.md`, `templates/watercolor-story/`): a vertical short that tells a

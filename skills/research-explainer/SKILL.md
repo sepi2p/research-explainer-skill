@@ -195,6 +195,15 @@ sticky notes stamped with their real names and a ladder of ideas, rendered from 
 a 45 s demo on averaging noisy measurements at a baker's bench). When the user asks for the paper-diorama style or for
 "the same style as" a video made with it, do not use Manim or re-run style research: read
 [references/style-diorama.md](references/style-diorama.md) and start from `templates/diorama/`.
+For a long YouTube episode, plan its section 7 from the storyboard on:
+- music under the whole video (an original score: `work/measure_voice.py`, `work/make_cuemap.py`, `work/music.py`,
+  following [references/music-diorama.md](references/music-diorama.md));
+- a sound on every visible motion (`work/probe_motion.mjs` finds them, `work/audio.py` places them);
+- a ladder that fills as the video plays;
+- one short subscribe ask after the first payoff;
+- an outro that leaves room for YouTube's end-screen elements;
+- every paper listed in the description;
+- the upload checks.
 
 ## 12. Vertical short (optional)
 

@@ -122,3 +122,42 @@ text under the captions, slips on screen too briefly to read. One accuracy pass:
 - **Another language = rerun, not translate**: rerun the experiments in that language so graph paper shows real outputs
   in it; translate only the narration.
 - **Music** you cannot hear: measure it (ebur128), keep it 8–12 dB under the voice, and ask the user to listen.
+
+## 7. Finishing a long YouTube episode (user notes on an approved episode)
+
+An approved 20-minute episode in this style still lacked these; plan them in the storyboard, not after the render.
+
+- **Music: compose it, following [music-diorama.md](music-diorama.md).** That brief fixes the sound, tempo, key, palette, the room left for the voice, recipes per section type, the form over 20+ minutes, the mix and the checks. Per new video, only re-measure the narrator (its section 3) and build the cue map from the timeline. The template does both and composes the score: `work/measure_voice.py`, `work/make_cuemap.py`, `work/music.py` (order in the template README, "Original music").
+- **Music under the whole video.** `work/music/` empty means no music at all, silently: check that the mix has a music
+  stem before calling a draft done. Use only music with a verified licence (an original score from CC0 samples, or a
+  library whose terms cover every platform you post to). Keep it 8–12 dB under the voice in pauses and duck further
+  under speech.
+- **A sound on every visible motion.** Every reveal, stamp, card flight, chip, pin, counter and camera move gets a sound
+  from the same cue the motion uses (`E.cue`), so they stay in sync. Aim for roughly 6–10 sounds per minute in every chapter, not
+  only in the hook (the approved episode had 60 per minute in the hook and 0.5–4 in chapters 2–7).
+  `node work/probe_motion.mjs` finds every component appearance, pin and camera move in the page itself; `work/audio.py`
+  then gives each one without a hand-placed cue a quiet sound. Run the probe again after every timing change.
+- **A ladder that reads at a glance.** The rails sit on a cream paper backing with an ink outline, so they read on light
+  walls and on dark scenes. Rails and rungs are at least 3 px. Labels are at least 12.5 px, and the current rung is a
+  saffron pill. A saffron fill climbs the rails as the video plays: it reaches a rung when its chapter starts and creeps
+  80% of the way to the next one by the chapter's end. Check the current label against content near the right edge in
+  every contact sheet.
+- **References.** List every paper shown on screen in the description, in order of appearance, each with a stable link,
+  checked against the primary source. Say once in the video, where the citations pile up (e.g. the term wall), that
+  all of them are linked in the description.
+- **Calls to action.** One short ask (5 s or less) for a like or subscribe, right after the first big payoff and before
+  the next problem, said in the narrator's voice and drawn in the paper style. The comment prompt is a specific question
+  ("which topic should we simplify next?"), asked in the outro and repeated in a pinned comment.
+- **An outro built for the end screen.** The last 5–20 s (YouTube's end-screen window) shows the set with empty paper
+  frames where the end-screen elements will sit (a "next video" or playlist frame and a round subscribe slot), and no
+  text or motion under them. The final lines are voiced under it.
+- **Upload checks** (YouTube help pages, Nov 2026):
+  - True peak ≤ −1 dBTP after encoding; −14 LUFS integrated is fine. `work/assemble.py` limits the peak and prints both.
+  - Chapters in the description start at 0:00, at least three, each ≥ 10 s.
+  - Upload your own .srt. `work/srt.py` keeps each cue to two lines of at most 42 characters; its `DIGITS` list shows
+    spoken numbers as digits.
+  - Up to three hashtags show by the title.
+  - The description holds at most 5000 characters.
+  - Say in the description that the narrator is an AI voice (OpenAI's TTS policy requires telling viewers).
+  - Set "not made for kids" and category Education.
+  - Link each Short cut from the episode back to it with "Related video".

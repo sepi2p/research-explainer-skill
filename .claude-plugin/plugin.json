@@ -1,6 +1,6 @@
 {
   "name": "research-explainer",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "3Blue1Brown-style research explainer videos and slides (English and Persian), with accuracy checks and real-data figures",
   "author": { "name": "sepi2p" },
   "homepage": "https://github.com/sepi2p/research-explainer-skill",

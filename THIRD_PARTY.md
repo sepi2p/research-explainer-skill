@@ -47,7 +47,8 @@ versions and copies their builds into `assets/lib/` (which that template's `.git
   (huggingface.co/csukuangfj/sherpa-onnx-nemo-parakeet-tdt-0.6b-v3-int8) and runs it with sherpa-onnx (Apache-2.0).
 - Lemo-Opuscar (MIT, github.com/lemomo-ai/lemo-opuscar) and two of its sample packs, VS Chamber Orchestra: Community
   Edition (VSCO 2 CE) and the Versilian Community Sample Library (VCSL), both CC0 1.0 by Versilian Studios: the sampler
-  behind `templates/short/work/music.py` and `templates/watercolor-story/work/music.py`.
+  behind `templates/short/work/music.py`, `templates/watercolor-story/work/music.py` and
+  `templates/diorama/work/music.py` (optional: without it the diorama has no score, or uses your own `work/music/bed.*`).
 - Data, audio and image scripts: numpy, scipy, soundfile (BSD-3-Clause), soxr (LGPL-2.1-or-later), Pillow (MIT-CMU); the diorama's free voice uses
   Piper TTS (listed above).
 - OpenAI models (gpt-audio-1.5, gpt-4o-transcribe, whisper-1, gpt-5.5, gpt-4.1-mini, text-embedding-3-small, gpt-image-2) are used

@@ -26,8 +26,10 @@ video/           the page: index.html, main.js (the video's configuration at the
                  components/{base,chars,set}.js, scenes/s1..s4, data.js + timeline.js (generated),
                  lib/rough.js (roughjs 4.6.6, MIT), fonts/ (JetBrains Mono, Caveat; OFL),
                  render_seg.mjs, render_par.sh (parallel render), stills.sh, stills_scene.sh, debug.mjs, ENGINE.md
-work/            make_data.py, timeline.py, srt.py, sheet.py, audio.py (voice + music bed + synthesized SFX),
-                 assemble.py (-14 LUFS), render_part.sh (draft of one part), voice_piper.py (free voice),
+work/            make_data.py, timeline.py, srt.py, sheet.py, audio.py (voice + music + synthesized SFX),
+                 measure_voice.py + make_cuemap.py + music.py (an original score from CC0 samples, optional),
+                 probe_motion.mjs + probe_hooks.js (motion events for automatic SFX), assemble.py (-14 LUFS, true
+                 peak <= -1 dBTP), render_part.sh (draft of one part), voice_piper.py (free voice),
                  narrate.py + oa.py (paid OpenAI translation and voice), proc_voice.py, wordtimes.py, pauses.py
 ```
 
@@ -60,11 +62,43 @@ The full 480p render takes about 20 s with 10 browsers; use `--width 1920 --heig
    top of `main.js` (scene order, chapter labels, ladder rungs, cracks). The contract, the components and the checks
    are in [video/ENGINE.md](video/ENGINE.md); `s1_reading.js` is the reference scene. Check each scene with
    `./stills_scene.sh <scene> "t1,t2,..."` and look at the sheet.
-6. **Sound (optional).** Edit the SFX table in `work/audio.py`, then `python3 work/audio.py` (numpy) →
-   `work/audio/mix.wav`. A music bed is your own licensed track at `work/music/bed.wav` (or .mp3/.flac/.m4a).
+6. **Sound (optional).** Edit the SFX table in `work/audio.py`, then `node work/probe_motion.mjs` (a few seconds: every
+   component appearance, ribbon pin and camera move → `work/audio/motion_events.json`) and `python3 work/audio.py`
+   (numpy) → `work/audio/mix.wav`: the table's cues plus a quiet automatic sound on each motion they do not cover.
+   Re-run the probe after every timing change. Music: compose an original score (next section), or put your own
+   licensed track at `work/music/bed.wav` (or .mp3/.flac/.m4a; looped). A score wins over a bed.
 7. **Render and deliver.** Drafts at 480p first (`work/render_part.sh NAME "s2_average" T0 T1` for one part,
-   `render_par.sh` for all), then `python3 work/assemble.py silent.mp4 out.mp4` if there is sound;
-   `python3 work/srt.py` writes `work/subs_<lang>.srt`.
+   `render_par.sh` for all), then `python3 work/assemble.py silent.mp4 out.mp4` if there is sound (−14 LUFS, true peak
+   ≤ −1 dBTP; it prints both); `python3 work/srt.py` writes `work/subs_<lang>.srt` (two lines of at most 42 characters;
+   fill its `DIGITS` list to show spoken numbers as digits).
+
+## Original music (optional)
+
+An original score in the brief's sound ([references/music-diorama.md](../../references/music-diorama.md)), composed in
+code from CC0 samples with the Lemo-Opuscar sampler (MIT; not included):
+`git clone https://github.com/lemomo-ai/lemo-opuscar ~/lemo-opuscar`, then in it
+`sh tools/fetch.sh instruments vsco2ce && sh tools/fetch.sh instruments vcsl` (about 670 MB) and its venv
+(`python3 -m venv .venv && .venv/bin/pip install -r requirements.txt`: numpy, scipy, soundfile, soxr). `PY=~/lemo-opuscar/.venv/bin/python`;
+set `LEMO_OPUSCAR` if it lives elsewhere. In this order, after the voice and the final timing:
+
+```bash
+python3 work/audio.py                # SFX cues -> work/audio/cues.json (the score avoids them)
+$PY work/measure_voice.py            # narrator: f0, LTAS, no-sustain zone, speech spans -> work/music/voice_profile.json
+$PY work/make_cuemap.py              # sections, hits, dropouts -> work/music/cuemap.json (edit its CONFIG block)
+nice -n 10 $PY work/music.py         # -> work/music/score.wav (+ stems, credits.txt, score_meta.json); DRY=1: lint only
+python3 work/audio.py                # now mixes the score, ducked like a bed; prints voice minus music under speech
+python3 work/assemble.py silent.mp4 out.mp4
+```
+
+- `make_cuemap.py`: every scene is a chapter (cadence + 1 s crossfade). Its CONFIG names each scene's function
+  (hook, story, naming, payoff, problem, data, recap, teaser, cta, outro), splits inside scenes, and the beats that
+  are asides (music off), dry lines (said into silence), holds (a silence-only pause the music carries), calls to
+  action, and dense-number stretches (thin). Energies per function are defaults you can override.
+- `music.py`: its CONFIG holds the seed, home key (tune it to your chapter chime), tempi, ladder root, pitched SFX,
+  orchestration rotation and the section recipes. It prints the lint (what it moved, damped or dropped) and the
+  brief's checks; `score_meta.json` keeps both, with the LRA (≤ 6 LU wanted).
+- Re-run all four after any timing change. A text-only video works too (the profile is then assumed, marked so).
+- Put `work/music/credits.txt` in the description (the samples are CC0; the credit is a courtesy).
 
 ## Adding a voice
 
@@ -78,8 +112,8 @@ The page needs no audio: a text-only render is complete. To narrate it:
   `python3 work/wordtimes.py --lang <lang>` and real pauses at ⏸ marks: `python3 work/pauses.py --lang <lang>`.
 
 Then `python3 work/timeline.py --lang <lang>` picks up the clip lengths (and word times) automatically and turns the
-captions off (`--captions` keeps them as burned subtitles), re-render, `python3 work/audio.py`, and
-`python3 work/assemble.py`. Scene cues follow the new timing by themselves.
+captions off (`--captions` keeps them as burned subtitles), re-render, `node work/probe_motion.mjs`,
+`python3 work/audio.py`, and `python3 work/assemble.py`. Scene cues follow the new timing by themselves.
 
 ## Persian and other right-to-left languages
 
@@ -94,4 +128,5 @@ strings in Persian. See ENGINE.md, "Text and language".
 
 rough.js is MIT (`video/lib/LICENSE_roughjs.txt`); JetBrains Mono and Caveat are OFL (`video/fonts/`); Inter and
 Vazirmatn come from the skill's `assets/fonts` (OFL), injected by `render_seg.mjs`. Not included: voice clips, music,
-rendered videos and Python environments (re-create them with the scripts above).
+rendered videos and Python environments (re-create them with the scripts above), and the Lemo-Opuscar sampler and
+its CC0 sample packs (fetched by you, see "Original music").
