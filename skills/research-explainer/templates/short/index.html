@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"
+  data-composition-variables='[{"id":"endline","type":"string","label":"End card: where to find more","default":"Simulation code: link in the description"}]'>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=540, height=960" />
+    <!-- Draft canvas 540x960; the final export renders the same files at 1080x1920 with --resolution portrait. -->
+    <script src="assets/lib/gsap.min.js"></script>
+    <script src="assets/lib/p5.min.js"></script>
+    <script src="assets/lib/pixi.min.js"></script>
+    <script src="assets/lib/transitions.js"></script>
+    <script src="assets/data.js"></script>
+    <script src="assets/captions.js"></script>
+    <style>
+      @font-face { font-family: "Caveat"; src: url("assets/fonts/Caveat.ttf"); font-weight: 400 700; }
+      :root {
+        --paper: #F3E9D2; --paper-shade: #E6D7B8; --ink: #1F2A44; --brick: #B5533C; --saffron: #E9A23B;
+        --teal: #2A9D8F; --steel: #4F6FA8; --pomegranate: #C8372D; --graph: #FBFAF6; --grid: #C9D6E3;
+        --cream: #FBF3E2; --wood: #A87C52; --wood-dark: #7A5434;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 540px; height: 960px; overflow: hidden; background: var(--paper); }
+      #root { position: relative; width: 100%; height: 100%; font-family: "Inter", sans-serif; color: var(--ink); }
+      #bg { z-index: 0; }
+      .scene-host { z-index: 10; }
+      .trans-host { z-index: 50; }
+      #captions { z-index: 100; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="35.5" data-width="540" data-height="960">
+
+      <div id="bg" data-composition-id="bg" data-composition-src="compositions/bg.html" data-no-timeline
+        data-start="0" data-duration="35.5" data-track-index="0" data-track-kind="graphics" data-width="540" data-height="960"></div>
+
+      <div id="s1" class="scene-host" data-composition-id="s1" data-composition-src="compositions/s1.html"
+        data-start="0" data-duration="4.95" data-track-index="1" data-track-kind="graphics" data-width="540" data-height="960"></div>
+      <div id="s2" class="scene-host" data-composition-id="s2" data-composition-src="compositions/s2.html"
+        data-start="4.95" data-duration="5.25" data-track-index="1" data-track-kind="graphics" data-width="540" data-height="960"></div>
+      <div id="s3" class="scene-host" data-composition-id="s3" data-composition-src="compositions/s3.html"
+        data-start="10.2" data-duration="8.15" data-track-index="1" data-track-kind="graphics" data-width="540" data-height="960"></div>
+      <div id="s4" class="scene-host" data-composition-id="s4" data-composition-src="compositions/s4.html"
+        data-start="18.35" data-duration="12.6" data-track-index="1" data-track-kind="graphics" data-width="540" data-height="960"></div>
+      <div id="s5" class="scene-host" data-composition-id="s5" data-composition-src="compositions/s5.html"
+        data-start="30.95" data-duration="4.55" data-track-index="1" data-track-kind="graphics" data-width="540" data-height="960"></div>
+
+      <!-- GL Transitions between still frames of the two scenes (stills from: npx hyperframes snapshot, work/stills.sh) -->
+      <div id="t1" class="trans-host" data-composition-id="t1" data-composition-src="compositions/t1.html"
+        data-start="9.9" data-duration="0.6" data-track-index="2" data-track-kind="graphics" data-width="540" data-height="960"></div>
+      <div id="t2" class="trans-host" data-composition-id="t2" data-composition-src="compositions/t2.html"
+        data-start="18.1" data-duration="0.55" data-track-index="2" data-track-kind="graphics" data-width="540" data-height="960"></div>
+
+      <div id="captions" data-composition-id="captions" data-composition-src="compositions/captions.html"
+        data-start="4.85" data-duration="30.65" data-track-index="3" data-track-kind="captions" data-width="540" data-height="960"></div>
+
+      <!-- voice (gpt-audio-1.5, marin) + CC0 score (Lemo-Opuscar sampler), premixed through a limiter; stems: assets/voice_n.wav, assets/music_n.wav -->
+      <audio id="mix" class="clip" src="assets/mix.wav" data-start="0" data-duration="35.5" data-track-index="4" data-volume="0.79"></audio>
+    </div>
+    <script>
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

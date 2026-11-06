@@ -1,0 +1,101 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font: 400 16px "Inter", sans-serif; color: #1F2A44; }
+    #sB1-svg { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+    #sB1-p5 { position: absolute; left: 0; top: 0; width: 540px; height: 620px; }
+    #sB1-title { position: absolute; left: 36px; top: 92px; font: 900 56px/1 "Inter", sans-serif; color: #B5533C; letter-spacing: -0.02em; }
+    #sB1-sub { position: absolute; left: 38px; top: 150px; font: 700 15px "Inter", sans-serif; color: #3C4660; }
+    #sB1-sub b { color: #9C4130; }
+    .sB1-tk { position: absolute; top: 392px; width: 80px; margin-left: -40px; text-align: center; font: 400 14px "JetBrains Mono", monospace; color: #3C4660; }
+    #sB1-true { position: absolute; left: 280px; top: 196px; font: 700 24px/1 var(--hand); color: #1D6B62; }
+    #sB1-sig { position: absolute; left: 0; top: 431px; width: 540px; text-align: center; font: 800 15px "Inter", sans-serif; color: #9C4130; }
+    #sB1-card { position: absolute; left: 296px; top: 456px; width: 220px; height: 138px; border-radius: 12px; background: rgba(255,252,244,0.9); box-shadow: 0 3px 12px rgba(90,70,50,0.25); padding: 10px 14px; }
+    #sB1-card-h { font: 700 14px "JetBrains Mono", monospace; color: #3C4660; }
+    #sB1-val { font: 900 34px/1.15 "Inter", sans-serif; margin-top: 4px; }
+    #sB1-val span { font: 700 18px "Inter", sans-serif; }
+    #sB1-off { font: 700 15px "Inter", sans-serif; margin-top: 2px; }
+    #sB1-wob { position: absolute; left: 14px; top: 34px; width: 192px; font: 700 15px/1.3 "Inter", sans-serif; color: #3C4660; opacity: 0; }
+    #sB1-wob b { display: block; font: 900 34px/1.15 "Inter", sans-serif; color: #9C4130; }
+  </style>
+  <div id="root" data-composition-id="sB1" data-width="540" data-height="960">
+    <svg id="sB1-svg" viewBox="0 0 540 960" data-layout-ignore></svg>
+    <div id="sB1-p5" data-layout-ignore></div>
+    <div id="sB1-title">Wobble</div>
+    <div id="sB1-sub">one reading = <b>500 g</b> + a random push</div>
+    <div class="sB1-tk" style="left:123px">499.5</div><div class="sB1-tk" style="left:270px">500.0 g</div><div class="sB1-tk" style="left:417px">500.5</div>
+    <div id="sB1-true">the bag: 500 g</div>
+    <div id="sB1-sig"></div>
+    <div id="sB1-card" data-layout-allow-overflow><div id="sB1-card-h"></div><div id="sB1-val"></div><div id="sB1-off"></div>
+      <div id="sB1-wob">typical wobble<b></b></div></div>
+  </div>
+  <script>
+    (function () {
+      const D = window.DATA, PUP = window.PUP, svg = document.getElementById("sB1-svg"), WC = (window.PSTYLE || {}).look === "watercolor";
+      const clamp = (x) => Math.max(0, Math.min(1, x)), ramp = (t, a, b) => clamp((t - a) / (b - a));
+      const eio = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      const AXY = 380, PXG = 293.3, X = (v) => 270 + (v - D.true) * PXG;            // the number line: 499.25 .. 500.75 g
+      document.getElementById("sB1-sig").textContent = "± " + D.sigma.toFixed(2) + " g (one standard deviation)";
+      document.querySelector("#sB1-wob b").textContent = "± " + D.sigma.toFixed(2) + " g";
+      // the 80 single readings of work/make_data.py: each flies out of the scale and stacks on the line (a dot plot)
+      const DISP = [210, 543], cnt = {};
+      const R = D.singles.map((v, i) => { const b = Math.round((v - D.true) / 0.05); const h = cnt[b] = (cnt[b] || 0) + 1;
+        return { v, x: 270 + b * 0.05 * PXG, y: AXY - 9 * h + 1, t0: 0.3 + 2.3 * Math.pow(i / (D.singles.length - 1), 0.55) }; });
+      const lastAt = (t) => { let k = -1; R.forEach((r, i) => { if (t >= r.t0) k = i; }); return k; };
+      let P5 = null, curT = 0, ready = false;
+      function draw(p, t) {
+        p.clear(); p.noStroke();
+        R.forEach((r) => {
+          if (t < r.t0) return;
+          const u = eio(clamp((t - r.t0) / 0.35)), v = 1 - u, cx = (DISP[0] + r.x) / 2, cy = Math.min(DISP[1], r.y) - 140;
+          const x = v * v * DISP[0] + 2 * v * u * cx + u * u * r.x, y = v * v * DISP[1] + 2 * v * u * cy + u * u * r.y;
+          const c = r.v < D.true ? [79, 111, 168] : [181, 83, 60];
+          if (WC) { p.fill(c[0], c[1], c[2], 55); p.circle(x, y, 12); p.fill(c[0], c[1], c[2], 150); p.circle(x + 0.5, y + 0.4, 5.4); }
+          else { p.fill(c[0], c[1], c[2], 220); p.circle(x, y, 7.5); }
+        });
+      }
+      function svgDraw(t) {
+        const s = Math.floor(t * 8) % 8, tq = Math.floor(t * 12) / 12;
+        let o = "";
+        // the number line, the bag's true weight, and (on "a quarter gram") the one-sigma bracket
+        o += PUP.line(40, AXY + 6, 500, AXY + 6, s, 1, { strokeWidth: 2.4 });
+        [499.5, 500, 500.5].forEach((v, k) => { o += PUP.line(X(v), AXY, X(v), AXY + 14, s, 2 + k, { strokeWidth: 2 }); });
+        o += '<path d="M 270 214 L 270 ' + AXY + '" stroke="#1D6B62" stroke-width="2" stroke-dasharray="6 6"/>';
+        const sg = ramp(t, 1.6, 1.9);
+        if (sg > 0) o += '<g opacity="' + sg + '" stroke="#9C4130" stroke-width="3" stroke-linecap="round" fill="none"><path d="M ' + X(499.75) + ' 422 L ' + X(500.25) + ' 422 M ' + X(499.75) + ' 415 L ' + X(499.75) + ' 429 M ' + X(500.25) + ' 415 L ' + X(500.25) + ' 429"/></g>';
+        // the apprentice behind a bit of counter, one hand on the bag on the scale; the display shows the last reading
+        const k = Math.max(0, lastAt(t)), grip = [(191.4 - 96) / 0.62, (461.7 - 486) / 0.62];
+        o += '<g transform="translate(96 486) scale(0.62)">' + PUP.apprentice(s, { lookX: 3, lookY: -4, head: 6 + 2 * Math.sin(tq * 3), blink: ((t + 0.3) % 3.1) < 0.13, smile: 0.5, handR: grip, worry: t > 1.2 && t < 2.6 }) + "</g>";
+        o += PUP.memo("bit", s, (s) => PUP.rect(-10, 560, 290, 12, s, 1, { fill: PUP.C.block, strokeWidth: 2.2 }) + PUP.rect(-6, 572, 282, 30, s, 2, { fill: PUP.C.wood, strokeWidth: 2.2 }));
+        o += '<g transform="translate(210 560) scale(0.62)">' + PUP.scale(s) + PUP.scaleDisplay(D.singles[k].toFixed(1), true) + "</g>";
+        o += '<g transform="translate(210 520) scale(0.62)">' + PUP.bag(s) + "</g>" + '<g transform="translate(191.4 461.7) scale(0.62)">' + PUP.memo("grip", s, (s) => PUP.circ(0, 0, 18, s, 3, { fill: PUP.C.skinA })) + "</g>";
+        if (window.PSTYLE && PSTYLE.post) o = PSTYLE.post(o);
+        svg.innerHTML = (window.PSTYLE && PSTYLE.defs ? PSTYLE.defs : "") + o;
+        // the card: the reading that just flew, then (on "a quarter gram") the typical wobble
+        const r = D.singles[k], off = r - D.true;
+        document.getElementById("sB1-card-h").textContent = "reading " + (k + 1) + " of " + D.singles.length;
+        document.getElementById("sB1-val").innerHTML = r.toFixed(2) + " <span>g</span>";
+        const offEl = document.getElementById("sB1-off");
+        offEl.textContent = "off by " + (off >= 0 ? "+" : "−") + Math.abs(off).toFixed(2) + " g"; offEl.style.color = off < 0 ? "#3A527F" : "#9C4130";
+      }
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo("#sB1-true", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 0.05);
+      // "wobbles" (15.52 = 1.57): the card turns into the typical wobble, the bracket and its label appear (said as "a quarter gram")
+      tl.to(["#sB1-card-h", "#sB1-val", "#sB1-off"], { opacity: 0, duration: 0.2 }, 1.5);
+      tl.fromTo("#sB1-wob", { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.25 }, 1.58);
+      tl.fromTo("#sB1-sig", { opacity: 0 }, { opacity: 1, duration: 0.25 }, 1.65);
+      const build = new Promise((resolve) => {
+        document.fonts.ready.then(() => {
+          P5 = new p5((p) => {
+            p.setup = () => { p.pixelDensity(window.devicePixelRatio || 1); const c = p.createCanvas(540, 620); c.parent("sB1-p5"); p.noLoop(); ready = true; resolve(); };
+            p.draw = () => { if (ready) draw(p, curT); };
+          }, document.getElementById("sB1-p5"));
+        });
+      });
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady["sB1-p5"] = build.then(() => { P5.redraw(); svgDraw(curT); });
+      const st = { t: 0 };
+      tl.fromTo(st, { t: 0 }, { t: 3.65, duration: 3.65, ease: "none", onUpdate: () => { curT = st.t; svgDraw(st.t); if (ready) P5.redraw(); } }, 0);
+      window.__timelines["sB1"] = tl;
+    })();
+  </script>
+</template>

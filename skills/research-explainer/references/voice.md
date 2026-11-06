@@ -9,6 +9,10 @@ Set in project.json -> "voice": {"mode": ...}; override per build with `--voice`
 | manual | free | as good as the recording | `rx.py voice-script <lang>` writes the script; put one file per beat in voice/manual_<lang>/<scene>_<beat>.mp3 |
 | openai | paid, per use | best (English and Persian) | default model gpt-audio-1.5, voice marin; key in ~/.config/openai/key or $OPENAI_API_KEY |
 
+Any other text-to-speech (a web tool, a TTS connector or MCP server the agent has, or a cloned voice the user owns) goes
+through `manual`: make one clip per beat from `rx.py voice-script <lang>` and save it as voice/manual_<lang>/<scene>_<beat>.mp3.
+Use only voices the user has the right to use (their own voice, or a stock voice under the service's terms).
+
 ## OpenAI details
 - The key is read from the file or environment only, never printed, never written to logs. Tell users to create the file
   themselves (`mkdir -p ~/.config/openai && nano ~/.config/openai/key && chmod 600 ~/.config/openai/key`); never ask them

@@ -1,0 +1,63 @@
+{
+ "lang": "en",
+ "about": "The demo's script: one idea per beat, 1-2 short sentences. 'en' is the source; add 'fa' (or another language key) per beat for a translated render. 'pause': extra seconds after the beat (room for the picture). Scene ids match video/scenes/<id>.js.",
+ "scenes": [
+  {
+   "id": "s1_reading",
+   "beats": [
+    {
+     "id": "W1",
+     "en": "This flour weighs two kilos, but our wobbly scale never quite agrees."
+    },
+    {
+     "id": "W2",
+     "en": "Each reading is off by a random wobble of about a quarter kilo.",
+     "pause": 0.3
+    }
+   ]
+  },
+  {
+   "id": "s2_average",
+   "beats": [
+    {
+     "id": "A1",
+     "en": "So Pip weighs it again and again, and averages the readings.",
+     "pause": 0.9
+    },
+    {
+     "id": "A2",
+     "en": "Four readings halve the error; sixteen halve it again: about 0.06.",
+     "pause": 0.5
+    },
+    {
+     "id": "A3",
+     "en": "The error falls like one over root n: the standard error.",
+     "pause": 1.4
+    }
+   ]
+  },
+  {
+   "id": "s3_shared",
+   "beats": [
+    {
+     "id": "C1",
+     "en": "But if a draught pushes every reading the same way, half the wobble is shared."
+    },
+    {
+     "id": "C2",
+     "en": "Then averaging stalls: even sixty-four readings stay near 0.18.",
+     "pause": 0.8
+    }
+   ]
+  },
+  {
+   "id": "s4_takeaway",
+   "beats": [
+    {
+     "id": "E1",
+     "en": "Averaging removes each reading's own wobble, not the shared part."
+    }
+   ]
+  }
+ ]
+}

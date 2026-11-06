@@ -24,10 +24,23 @@ You say *"make an explainer video of my paper"* (or your experiments, or a set o
 4. **Plans the scenes** in the 3Blue1Brown style, beat by beat by what moves, and shows you the plan before writing any
    animation.
 5. **Checks and builds** the video with Manim. `rx.py claims` fails if any number in the narration is missing from the
-   ledger or the measured data; the agent runs it before building.
+   ledger or the measured data; the agent runs it before building. Then it **reviews its own frames** (contact sheets, a
+   phone-size sheet), scores them on seven criteria, and fixes the worst problems until every score is 8 or more.
 6. Delivers `video.mp4`, a small copy for messaging apps, and subtitles (`.srt`, or burned in if you ask). It can also make
-   **slides** from the same claims and images, and a 20-30 s **launch video** (`rx.py promo`: motion graphics, music,
-   sound effects).
+   **slides** from the same claims and images, and a 20-30 s **launch video** (`rx.py promo`: motion graphics, music
+   synthesized in code or your own track, cuts on the measured beat, landscape, vertical or square).
+
+**Two more formats.** A hand-drawn **paper-diorama** style (a cut-paper set with a puppet and graph-paper slips of real
+runs; an HTML/SVG page rendered by Playwright, `templates/diorama/`), and **vertical shorts** for YouTube Shorts or
+LinkedIn (HyperFrames compositions rendered at 1080x1920 with a checked voice, timed captions and a CC0 sampled score,
+`templates/short/`).
+
+**Watercolor story shorts.** A vertical short that opens on a small painted scene with characters and then explains the
+idea: an image model paints the empty set and a paper wash once, and the engine animates painted puppets in front of it
+(they blink, mime their speech bubbles, react), with one narrator voice. Switch the look in one line: watercolor, paper
+cut-out or hand-drawn ink. `templates/watercolor-story/`, guide in `references/style-watercolor.md`.
+
+![Four frames of the watercolor story demo: a bakery where the scale never shows the same weight twice, the notepad of 16 readings, the readings as watercolor dabs, the end card](docs/style_watercolor.jpg)
 
 ### Voice options
 | option | cost | notes |

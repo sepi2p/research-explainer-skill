@@ -25,6 +25,17 @@ Record answers in project.json.
   collaborators' data, private names) and anything that must (caveats, acknowledgements).
 - Key figure(s) they want in the video, and the one sentence a viewer should remember.
 
+## Round 4 (optional): look
+- **Reference**: a video, a frame or a folder of images whose look they like (their own earlier video, a channel, a
+  launch film). We take its grammar, never its content: `rx.py reference <video>` -> `docs/style_guide.md`, shown to them
+  before any code (references/motion.md). No reference: the 3b1b dark palette and the house rules.
+- **Look** (show `docs/style_watercolor.jpg` and the demo frames): the 3b1b dark style (default, Manim), the paper diorama
+  (`references/style-diorama.md`), or a watercolor story short with painted sets and animated characters
+  (`references/style-watercolor.md`; also as paper cut-out or hand-drawn ink). To try looks on their own frame first:
+  `templates/watercolor-story/work/explore_styles.py` (paid, OpenAI images).
+- **Launch video**: shape (landscape for posts and READMEs, vertical for stories and reels, square), and music (their own
+  track that they may use, or original music synthesized in code).
+
 ## Defaults when the user doesn't care
 Researchers in nearby fields; 5-8 min per paper; English; text only (no cost); 720p; dark 3b1b palette; status tags on
 every result; a "limits" scene before the end.

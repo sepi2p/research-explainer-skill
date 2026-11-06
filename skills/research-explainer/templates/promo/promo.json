@@ -6,11 +6,14 @@
  "height": 720,
  "poster": 21.6,
  "music": {
-  "file": "media/music.mp3",
-  "start": 0,
-  "gain_db": 0,
-  "fade_out": 1.8,
-  "note": "a track you may use (your own, or a CC0 / public-domain / licensed one); set start so its drop lands on the reveal"
+  "synth": {
+   "bpm": 110,
+   "offset": 0.81,
+   "drop": 2.2,
+   "mood": "dark",
+   "seed": 7
+  },
+  "note": "original music made in code (no licence question). Or use your own track: {\"file\": \"media/music.mp3\", \"start\": 0} plus \"beats\": \"media/music.beats.json\" from rx.py beats"
  },
  "sfx": [
   {
@@ -328,5 +331,10 @@
    "file": "pop",
    "gain_db": -14
   }
+ ],
+ "format": "landscape",
+ "motion_blur": 1,
+ "check_at": [
+  3.0
  ]
 }

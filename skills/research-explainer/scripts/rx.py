@@ -16,14 +16,21 @@
   rx.py assemble <lang> [--voice MODE] [--quality ...] [--no-music]
   rx.py qc <lang> [--voice MODE] [--quality ...]   contact sheets: build/qc/<lang>_<mode>/<scene>.png
 
-  rx.py promo [dir] [--lang fa] [--stills 1.5,9,20]   short launch video from an HTML timeline (promo/index.html + promo.json)
+  rx.py promo [dir] [--lang fa] [--format landscape|vertical|square] [--sub 4] [--stills 1.5,9,20]
+                                            short launch video from an HTML timeline (promo/index.html + promo.json)
+  rx.py music <out.wav> --duration 23 [--bpm 120] [--drop 3] [--offset 0.8] [--mood dark|bright] [--seed 7] [--sections ..]
+                                            original music synthesized in code + <out>.beats.json (its exact beat grid)
+  rx.py beats <track>                       measure bpm, beats, downbeats, hits of a supplied track -> <track>.beats.json
+  rx.py sheets <video> [--at 4.2 ...]       review sheets: contact (2 fps), phone size (360 px wide), strips around --at times
+  rx.py reference <video> [--every 0.5]     study a reference: frames, contact sheets, cuts and shot lengths -> refs/<name>/
 
   rx.py request "<what you wanted>" --missing ... --proposal ... [--example ...]   log a missing feature
   rx.py selftest                            build the bundled demo the way an agent would and check the outputs
 
 What each write does: `new` refuses a non-empty folder. `asset-add` replaces that file's record in assets/manifest.json.
 `durations` replaces build/durations_<lang>_<mode>.json; voice clips are kept and re-made only for beats whose text changed.
-`render` replaces that scene's video. `assemble` replaces the final mp4/srt. `promo` replaces <dir>/promo.mp4 and promo.jpg. `request` appends to feature_requests.md.
+`render` replaces that scene's video. `assemble` replaces the final mp4/srt. `promo` replaces <dir>/promo*.mp4 and .jpg. `music`/`beats` write the named files.
+`sheets` and `reference` replace their output folders. `request` appends to feature_requests.md.
 Nothing is ever uploaded or published.
 
 Run from the project folder (or set EXPLAINER_PROJECT). Outputs land in build/.
@@ -240,6 +247,18 @@ def cmd_selftest(a):
         good = (b / f).exists() and (b / f).stat().st_size > 1000
         ok &= good
         print(f"[{'ok' if good else 'FAIL'}] output {f}")
+    # launch-video audio: synthesized music must measure back to its own grid
+    step("music synthesized in code", ["music", str(tmp / "m.wav"), "--duration", "12", "--bpm", "120", "--drop", "2"], contains="BPM")
+    step("music arranged in sections", ["music", str(tmp / "m2.wav"), "--duration", "14", "--sections", "intro:1,build:1,drop:2,break:1,build:1,lift:1"], contains="BPM")
+    step("beat grid measured from a track", ["beats", str(tmp / "m.wav"), "--out", str(tmp / "measured.json")], contains="BPM")
+    try:
+        g, m = json.loads((tmp / "m.beats.json").read_text()), json.loads((tmp / "measured.json").read_text())
+        good = abs(m["bpm"] - g["bpm"]) < 0.5 and any(abs(d - g["drop"]) < 0.03 for d in m["downbeats"])
+    except Exception:
+        good = False
+    ok &= good
+    print(f"[{'ok' if good else 'FAIL'}] measured grid matches the synthesized one (bpm, downbeat on the drop)")
+    step("review sheets", ["sheets", str(b / "averaging_noise_en_text.mp4"), "--at", "2.0"], contains="phone.png")
     print(("PASS" if ok else "FAIL") + f"  (work folder {tmp}; contact sheets in {b / 'qc'})")
     return 0 if ok else 1
 
@@ -646,29 +665,81 @@ def cmd_promo(a):
     page = d / conf.get("page", "index.html")
     dur, fps = float(conf["duration"]), int(conf.get("fps", 30))
     W, H = int(conf.get("width", 1280)), int(conf.get("height", 720))
+    fmt = a.format or conf.get("format", "landscape")
+    if fmt == "vertical":
+        W, H = H, W                       # same pixel budget, turned: 1280x720 -> 720x1280
+    elif fmt == "square":
+        W = H
+    sub = a.sub or int(conf.get("motion_blur", 1))
     work = d / "work"
     work.mkdir(exist_ok=True)
     q = ["--query", f"?lang={a.lang}"] if a.lang else []
-    suf = f"_{a.lang}" if a.lang else ""
-    base = ["node", str(eng / "render.mjs"), str(page)]
-    if a.stills:
-        sh(base + ["-"] + q + ["--stills", a.stills, "--stills-dir", str(work / f"stills{suf}"), "--width", str(W), "--height", str(H)], check=True, cwd=d)
-        print("stills in", work / f"stills{suf}")
-        return
-    silent = work / f"video{suf}.mp4"
-    sh(base + [str(silent)] + q + ["--duration", str(dur), "--fps", str(fps), "--width", str(W), "--height", str(H)], check=True, cwd=d)
-    # audio: music from an offset, sound-effect cues at their times, then loudness to -14 LUFS (typical for social video)
-    ins, parts = [], []
+    suf = (f"_{a.lang}" if a.lang else "") + (f"_{fmt}" if fmt != "landscape" else "")
+    # music: a supplied track, or {"synth": {...}} = original music made in code; the beat grid comes with it
     m = conf.get("music")
-    if m and not a.no_music:
+    grid_file = None
+    if m and m.get("synth") is not None:
+        sy = m["synth"] or {}
+        mf = work / "music_synth.wav"
+        key = json.dumps([dur, sy], sort_keys=True)
+        stamp = work / "music_synth.key"
+        if not mf.exists() or not stamp.exists() or stamp.read_text() != key:
+            sh([numpy_python(), str(HERE / "explainer" / "beat.py"), "synth", str(mf), "--duration", str(dur + 0.5),
+                "--bpm", str(sy.get("bpm", 120)), "--seed", str(sy.get("seed", 7)), "--mood", sy.get("mood", "dark"),
+                "--offset", str(sy.get("offset", 0))] + (["--drop", str(sy["drop"])] if "drop" in sy else [])
+               + (["--sections", sy["sections"] if isinstance(sy["sections"], str) else ",".join(f"{k}:{n}" for k, n in sy["sections"])]
+                  if sy.get("sections") else []), check=True)
+            stamp.write_text(key)
+        grid_file = mf.with_suffix(".beats.json")
+    elif m and m.get("file"):
         mf = pathlib.Path(m["file"]).expanduser()
         if not mf.is_absolute():
             mf = d / mf
+    if conf.get("beats"):
+        grid_file = (d / conf["beats"]) if not pathlib.Path(conf["beats"]).is_absolute() else pathlib.Path(conf["beats"])
+        if not grid_file.exists():
+            die(f"beat grid not found: {grid_file}", f"measure the track: rx.py beats <track> (writes <track>.beats.json)")
+    grid = load_json(grid_file, None) if grid_file else None
+    if grid and m and m.get("file") and m.get("start") and not m.get("synth"):
+        # the page and the cues work in video time; the grid was measured in track time
+        off = float(m["start"])
+        for k in ("beats", "downbeats", "hits"):
+            grid[k] = [round(x - off, 4) for x in grid.get(k, []) if x >= off]
+        if "drop" in grid:
+            grid["drop"] = round(grid["drop"] - off, 4)
+    gb = []
+    if grid:
+        gf = work / "beats_video_time.json"
+        gf.write_text(json.dumps(grid))
+        gb = ["--beats", str(gf)]
+    base = ["node", str(eng / "render.mjs"), str(page)]
+    common = q + ["--width", str(W), "--height", str(H), "--format", fmt] + gb
+    if a.stills:
+        sh(base + ["-"] + common + ["--stills", a.stills, "--stills-dir", str(work / f"stills{suf}")], check=True, cwd=d)
+        print("stills in", work / f"stills{suf}")
+        return
+    silent = work / f"video{suf}.mp4"
+    sh(base + [str(silent)] + common + ["--duration", str(dur), "--fps", str(fps), "--sub", str(sub)], check=True, cwd=d)
+    # audio: music from an offset, sound-effect cues at their times, then loudness to -14 LUFS (typical for social video)
+    ins, parts = [], []
+    if m and not a.no_music and (m.get("file") or m.get("synth") is not None):
         if not mf.exists():
-            die(f"music file not found: {mf}", "set music.file in promo.json to a track you may use (see references/promo.md)")
+            die(f"music file not found: {mf}", "set music.file in promo.json to a track you may use, or \"synth\": {\"bpm\": 120} "
+                "for original music made in code (see references/promo.md)")
+        if m.get("synth") is not None:
+            m = dict(m, start=0)
         ins += ["-ss", str(m.get("start", 0)), "-i", str(mf)]
         fo = float(m.get("fade_out", 1.5))
         parts.append(f"[{len(parts)}:a]atrim=0:{dur},asetpts=N/SR/TB,afade=t=out:st={dur - fo}:d={fo},volume={m.get('gain_db', 0)}dB[a{len(parts)}]")
+    def cue_time(c):
+        # a cue is placed by "t" (seconds) or on the grid: "beat": n, "downbeat": n or "hit": n, plus an optional "offset"
+        for k, lst in (("beat", "beats"), ("downbeat", "downbeats"), ("hit", "hits")):
+            if k in c:
+                if not grid or int(c[k]) >= len(grid.get(lst, [])):
+                    die(f"sfx cue {c} needs a beat grid with that many {lst}", "add \"beats\": \"<track>.beats.json\" to promo.json "
+                        "(rx.py beats <track>) or use synthesized music")
+                return grid[lst][int(c[k])] + float(c.get("offset", 0))
+        return float(c["t"])
     for c in conf.get("sfx", []):
         f = pathlib.Path(c["file"]) if "/" in c["file"] else SKILL / "assets" / "sfx" / (c["file"] + ".ogg")
         if not f.is_absolute():
@@ -676,7 +747,7 @@ def cmd_promo(a):
         if not f.exists():
             die(f"sound effect not found: {f}", "use a name from assets/sfx/README.md or a path to your own file")
         k = len(parts)
-        ms = int(float(c["t"]) * 1000)
+        ms = int(max(0.0, cue_time(c)) * 1000)
         ins += ["-i", str(f)]
         parts.append(f"[{k}:a]aformat=sample_rates=48000:channel_layouts=stereo,adelay={ms}|{ms},volume={c.get('gain_db', -10)}dB[a{k}]")
     out = d / f"promo{suf}.mp4"
@@ -695,7 +766,108 @@ def cmd_promo(a):
     else:
         sh(["ffmpeg", "-v", "error", "-y", "-i", str(silent), "-i", str(poster), "-filter_complex", vf, "-map", "[v]",
             "-c:v", "libx264", "-crf", "18", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(out)], check=True)
-    print(f"{out.name}: {dur:.1f}s, {out.stat().st_size / 1e6:.1f} MB; poster {poster.name} (t={poster_t}s)")
+    print(f"{out.name}: {dur:.1f}s, {fmt} {W}x{H}, {out.stat().st_size / 1e6:.1f} MB; poster {poster.name} (t={poster_t}s)")
+    sd, made = make_sheets(out, work / f"sheets{suf}", conf.get("check_at", []))
+    print("review sheets: " + ", ".join(str(x) for x in made) + "  (look, score, fix: references/motion.md)")
+
+
+def numpy_python():
+    """A Python with numpy: this one if it has it, else the one that runs manim."""
+    try:
+        import numpy  # noqa: F401
+        return sys.executable
+    except ImportError:
+        return manim_python()
+
+
+def cmd_music(a):
+    """Original music synthesized in code (no licence questions) with its exact beat grid. See references/motion.md."""
+    args = [numpy_python(), str(HERE / "explainer" / "beat.py"), "synth", a.out, "--duration", str(a.duration), "--bpm", str(a.bpm),
+            "--seed", str(a.seed), "--mood", a.mood, "--offset", str(a.offset)] + (["--drop", str(a.drop)] if a.drop is not None else []) \
+        + (["--sections", a.sections] if a.sections else [])
+    return sh(args).returncode
+
+
+def cmd_beats(a):
+    """Measure the beat grid of a supplied track (bpm, beats, downbeats, hits, a guess at the drop)."""
+    if not pathlib.Path(a.track).exists():
+        die(f"no such file: {a.track}", "give the path of the music file")
+    args = [numpy_python(), str(HERE / "explainer" / "beat.py"), "measure", a.track] + (["--out", a.out] if a.out else [])
+    return sh(args).returncode
+
+
+def make_sheets(video, out, at=()):
+    """Contact sheet (about 2 frames/s), phone-size sheet (360 px wide, 1 frame/s) and 12-frame strips around times in `at`."""
+    video, out = pathlib.Path(video), pathlib.Path(out)
+    out.mkdir(parents=True, exist_ok=True)
+    d = float(probe(video, ["-show_entries", "format=duration"]))
+    made = []
+    for name, rate, width, cols, cap in (("contact", 2.0, 320, 6, 60), ("phone", 1.0, 360, 5, 30)):
+        r = min(rate, cap / max(d, 0.1))
+        rows = max(1, -(-int(d * r + 0.999) // cols))
+        f = out / f"{name}.png"
+        sh(["ffmpeg", "-v", "error", "-y", "-i", str(video), "-vf", f"fps={r:.4f},scale={width}:-2,tile={cols}x{rows}:padding=4:color=white",
+            "-frames:v", "1", "-update", "1", str(f)], check=True)
+        made.append(f)
+    for t in at:
+        f = out / f"strip_{float(t):06.2f}.png"
+        sh(["ffmpeg", "-v", "error", "-y", "-ss", f"{max(0, float(t) - 0.2):.3f}", "-i", str(video), "-vf",
+            "scale=320:-2,tile=6x2:padding=4:color=white", "-frames:v", "1", "-update", "1", str(f)], check=True)
+        made.append(f)
+    return d, made
+
+
+def cmd_sheets(a):
+    """Review sheets for any rendered video (explainer or launch video): look at them, score them, fix (references/motion.md)."""
+    v = pathlib.Path(a.video)
+    if not v.exists():
+        die(f"no such video: {v}", "render first (rx.py build / rx.py promo), then pass the mp4")
+    out = pathlib.Path(a.out) if a.out else v.with_name(v.stem + "_sheets")
+    d, made = make_sheets(v, out, a.at or [])
+    print(f"{v.name}: {d:.1f}s -> " + ", ".join(str(m) for m in made))
+    print("open them and score: hook in 2 s, readability at phone size, motion, variety, composition, accuracy, sound sync "
+          "(log in docs/review_log.md)")
+
+
+def cmd_reference(a):
+    """Study a reference video: one frame every --every seconds, contact sheets, cut times and shot lengths. The agent then
+    writes docs/style_guide.md (palette, type, shot lengths, transitions, camera, texture, how text enters and leaves)."""
+    src = a.video
+    if src.startswith(("http://", "https://")):
+        die("rx.py reference needs a local file", "download it first (for example with yt-dlp), only a video you may view, "
+            "then run rx.py reference <file>; we take its grammar (pacing, type, transitions), never its content")
+    v = pathlib.Path(src)
+    if not v.exists():
+        die(f"no such video: {v}", "give the path of the reference video")
+    out = pathlib.Path(a.out) if a.out else ROOT / "refs" / re.sub(r"[^\w.-]+", "_", v.stem)[:60]
+    fr = out / "frames"
+    if fr.exists():
+        shutil.rmtree(fr)
+    fr.mkdir(parents=True)
+    d = float(probe(v, ["-show_entries", "format=duration"]))
+    sh(["ffmpeg", "-v", "error", "-y", "-i", str(v), "-vf", f"fps=1/{a.every},scale=480:-2", str(fr / "f%04d.jpg")], check=True)
+    frames = sorted(fr.glob("*.jpg"))
+    per = 48   # frames per contact sheet, 6 across
+    sheets = []
+    for i in range(0, len(frames), per):
+        f = out / f"contact_{i // per + 1:02d}.png"
+        sh(["ffmpeg", "-v", "error", "-y", "-start_number", str(i + 1), "-i", str(fr / "f%04d.jpg"), "-frames:v", str(min(per, len(frames) - i)),
+            "-vf", f"tile=6x{-(-min(per, len(frames) - i) // 6)}:padding=4:color=white", "-update", "1", str(f)], check=True)
+        sheets.append(f)
+    r = sh(["ffmpeg", "-v", "info", "-i", str(v), "-vf", f"select='gt(scene,{a.cut})',showinfo", "-an", "-f", "null", "-"],
+           capture_output=True, text=True)
+    cuts = [round(float(m), 3) for m in re.findall(r"pts_time:([0-9.]+)", r.stderr)]
+    edges = [0.0] + cuts + [d]
+    shots = [round(b - a_, 3) for a_, b in zip(edges, edges[1:]) if b - a_ > 0.04]
+    med = sorted(shots)[len(shots) // 2] if shots else d
+    info = {"video": str(v), "duration": round(d, 3), "frame_every_s": a.every, "frames": len(frames), "cuts": cuts,
+            "shot_lengths": shots, "median_shot_s": med, "cuts_per_10s": round(10 * len(cuts) / d, 2) if d else 0,
+            "note": "take the grammar (pacing, type, palette, transitions), never the content, logos or characters"}
+    (out / "cuts.json").write_text(json.dumps(info, indent=1))
+    print(f"{v.name}: {d:.1f}s, {len(cuts)} cuts ({info['cuts_per_10s']} per 10 s), median shot {med:.2f}s")
+    print(f"frames {fr} ({len(frames)}), sheets: " + ", ".join(str(x) for x in sheets) + f", cuts {out / 'cuts.json'}")
+    print("next: look at every sheet, write docs/style_guide.md (palette hex, type, shot lengths, transitions, camera moves, "
+          "texture/grain, how text enters and exits), then the shot list in that style; show both before any code")
 
 
 def cmd_build(a):
@@ -720,6 +892,17 @@ def main():
     p = sub.add_parser("promo"); p.add_argument("dir", nargs="?", default="promo"); p.add_argument("--stills", default="")
     p.add_argument("--lang", default="", help="passed to the page as ?lang=..; outputs promo_<lang>.mp4")
     p.add_argument("--no-music", action="store_true")
+    p.add_argument("--format", choices=["landscape", "vertical", "square"], help="page layout and output shape (default from promo.json)")
+    p.add_argument("--sub", type=int, help="sub-frames blended per frame for motion blur (promo.json motion_blur)")
+    p = sub.add_parser("music"); p.add_argument("out"); p.add_argument("--duration", type=float, required=True)
+    p.add_argument("--bpm", type=float, default=120); p.add_argument("--drop", type=float, help="seconds; snapped to a bar")
+    p.add_argument("--mood", default="dark", choices=["dark", "bright"]); p.add_argument("--seed", type=int, default=7)
+    p.add_argument("--offset", type=float, default=0.0, help="seconds before the first downbeat")
+    p.add_argument("--sections", help="arrangement for a long track, e.g. intro:4,build:4,drop:8,break:4,build:2,lift:8 (bars)")
+    p = sub.add_parser("beats"); p.add_argument("track"); p.add_argument("--out")
+    p = sub.add_parser("sheets"); p.add_argument("video"); p.add_argument("--at", nargs="*", type=float); p.add_argument("--out")
+    p = sub.add_parser("reference"); p.add_argument("video"); p.add_argument("--every", type=float, default=0.5)
+    p.add_argument("--cut", type=float, default=0.3, help="scene-change threshold for cut detection"); p.add_argument("--out")
     p = sub.add_parser("asset-add"); p.add_argument("file"); p.add_argument("--kind", required=True, choices=["measured", "reported", "illustration", "generated"])
     p.add_argument("--by", required=True); p.add_argument("--note", default="")
     for name in ("strings", "voice-script", "durations", "render", "assemble", "qc", "build"):
@@ -732,7 +915,8 @@ def main():
     a = ap.parse_args()
     fn = {"check": cmd_check, "fonts": cmd_fonts, "status": cmd_status, "request": cmd_request, "selftest": cmd_selftest, "new": cmd_new, "claims": cmd_claims, "promo": cmd_promo, "assets": cmd_assets, "asset-add": cmd_asset_add,
           "strings": cmd_strings, "voice-script": cmd_voice_script, "durations": cmd_durations, "assemble": cmd_assemble,
-          "qc": cmd_qc, "build": cmd_build}.get(a.cmd)
+          "qc": cmd_qc, "build": cmd_build,
+          "music": cmd_music, "beats": cmd_beats, "sheets": cmd_sheets, "reference": cmd_reference}.get(a.cmd)
     if a.cmd == "render":
         return cmd_render(a, dry=a.dry)
     return fn(a)

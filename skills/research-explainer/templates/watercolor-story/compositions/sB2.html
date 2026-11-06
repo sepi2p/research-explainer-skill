@@ -1,0 +1,156 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font: 400 16px "Inter", sans-serif; color: #1F2A44; }
+    #sB2-svg { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+    #sB2-p5 { position: absolute; left: 0; top: 0; width: 540px; height: 620px; }
+    #sB2-fg { position: absolute; left: 0; top: 0; width: 540px; height: 960px; pointer-events: none; }
+    .sB2-title { position: absolute; left: 36px; top: 92px; font: 900 56px/1 "Inter", sans-serif; color: #B5533C; letter-spacing: -0.02em; }
+    .sB2-sub { position: absolute; left: 38px; top: 150px; font: 700 15px "Inter", sans-serif; color: #3C4660; }
+    .sB2-sub b { color: #9C4130; }
+    .sB2-head { position: absolute; top: 188px; font: 700 14px "JetBrains Mono", monospace; color: #3C4660; }
+    .sB2-n { position: absolute; left: 22px; width: 54px; text-align: right; font: 900 24px/1 "Inter", sans-serif; }
+    .sB2-tk { position: absolute; top: 414px; width: 80px; margin-left: -40px; text-align: center; font: 400 14px "JetBrains Mono", monospace; color: #3C4660; }
+    .sB2-e { position: absolute; left: 424px; font: 800 18px/1 "Inter", sans-serif; color: #3A527F; white-space: nowrap; }
+    .sB2-e.d { color: #9C4130; }
+    .sB2-half { position: absolute; left: 498px; font: 800 14px/1 "Inter", sans-serif; color: #9C4130; }
+    #sB2-card { position: absolute; left: 24px; top: 444px; width: 492px; height: 156px; border-radius: 12px; background: rgba(255,252,244,0.9); box-shadow: 0 3px 12px rgba(90,70,50,0.25); }
+    #sB2-card-h { position: absolute; left: 12px; top: 6px; font: 700 14px "JetBrains Mono", monospace; color: #3C4660; }
+    #sB2-rule { position: absolute; right: 12px; top: 5px; font: 800 14px "Inter", sans-serif; color: #9C4130; }
+    .sB2-lab { position: absolute; font: 700 14px "Inter", sans-serif; white-space: nowrap; }
+    .sB2-ax { position: absolute; font: 400 14px "JetBrains Mono", monospace; color: #3C4660; }
+    #sB2-ring { position: absolute; left: 414px; top: 368px; width: 104px; height: 30px; border: 3px solid #E9A23B; border-radius: 15px; }
+  </style>
+  <div id="root" data-composition-id="sB2" data-width="540" data-height="960">
+    <svg id="sB2-svg" viewBox="0 0 540 960" data-layout-ignore></svg>
+    <div id="sB2-p5" data-layout-ignore></div>
+    <div class="sB2-title" id="sB2-t1">Average</div>
+    <div class="sB2-sub" id="sB2-s1">each dot: one session's <b>average</b> of n readings</div>
+    <div class="sB2-title" id="sB2-t2">Draught</div>
+    <div class="sB2-sub" id="sB2-s2">one push that <b>every reading</b> shares</div>
+    <div class="sB2-head" style="left:24px">readings</div><div class="sB2-head" id="sB2-eh" style="left:424px">error</div>
+    <div id="sB2-rows"></div>
+    <div class="sB2-tk" style="left:150px">499.5</div><div class="sB2-tk" style="left:250px">500.0 g</div><div class="sB2-tk" style="left:350px">500.5</div>
+    <div id="sB2-ring" data-layout-ignore></div>
+    <div id="sB2-card" data-layout-allow-overflow>
+      <div id="sB2-card-h">error of the average (g)</div><div id="sB2-rule">4× the readings → ½ the error</div>
+      <div class="sB2-ax" style="left:12px;top:52px">0.2</div><div class="sB2-ax" style="left:12px;top:87px">0.1</div><div class="sB2-ax" style="left:22px;top:121px">0</div>
+      <div class="sB2-ax" style="left:96px;top:136px">1</div><div class="sB2-ax" style="left:186px;top:136px">4</div><div class="sB2-ax" style="left:272px;top:136px">16</div><div class="sB2-ax" style="left:362px;top:136px">64 readings</div>
+      <div class="sB2-lab" id="sB2-l1" style="left:384px;top:108px;color:#3A527F">random only</div>
+      <div class="sB2-lab" id="sB2-l2" style="left:384px;top:58px;color:#9C4130">with a draught</div>
+      <div class="sB2-lab" id="sB2-l3" style="left:112px;top:96px;color:#3A527F">0.25 g ÷ √n</div>
+      <div class="sB2-lab" id="sB2-l4" style="left:40px;top:70px;color:#9C4130;font-size:14px"></div>
+    </div>
+    <svg id="sB2-fg" viewBox="0 0 540 960" data-layout-ignore></svg>
+  </div>
+  <script>
+    (function () {
+      const D = window.DATA, PUP = window.PUP, svg = document.getElementById("sB2-svg"), fg = document.getElementById("sB2-fg"), WC = (window.PSTYLE || {}).look === "watercolor";
+      const clamp = (x) => Math.max(0, Math.min(1, x)), ramp = (t, a, b) => clamp((t - a) / (b - a));
+      const eio = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      const NS = D.ns, RY = [232, 282, 332, 382], AXY = 408, X = (v) => Math.max(92, Math.min(408, 250 + (v - D.true) * 200));
+      // when each row arrives (scene time, from the word times: "Average 4" 0.64, "16" 2.48, "64" 4.32)
+      const ROW_T = [0, 0.64, 2.48, 4.32], HALF_T = [1.92, 3.44, 5.2], DRAUGHT_T = 8.2, DPOINT_T = [11.9, 12.15, 12.4, 12.65];
+      // the chart: x by log4(n), y by error (0 .. 0.26 g)
+      const CX = [124, 214, 304, 394], CY = (e) => 572 - e / 0.26 * 90, cxN = (n) => 124 + Math.log(n) / Math.log(4) * 90;
+      document.getElementById("sB2-l4").textContent = "floor " + D.floor_txt + " g";
+      const rows = document.getElementById("sB2-rows");
+      NS.forEach((n, i) => {
+        const a = document.createElement("div"); a.className = "sB2-n"; a.id = "sB2-n" + i; a.textContent = n; a.style.top = (RY[i] - 12) + "px"; rows.appendChild(a);
+        const e = document.createElement("div"); e.className = "sB2-e"; e.id = "sB2-e" + i; e.textContent = D.err_txt[n] + " g"; e.style.top = (RY[i] - 9) + "px"; e.setAttribute("data-layout-allow-overlap", ""); rows.appendChild(e);
+        const d = document.createElement("div"); d.className = "sB2-e d"; d.id = "sB2-d" + i; d.textContent = D.err_draught_txt[n] + " g"; d.style.top = (RY[i] - 9) + "px"; d.setAttribute("data-layout-allow-overlap", ""); rows.appendChild(d);
+        if (i) { const h = document.createElement("div"); h.className = "sB2-half"; h.id = "sB2-h" + i; h.textContent = "÷2"; h.style.top = (RY[i] - 35) + "px"; rows.appendChild(h); }
+      });
+      function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+      const R = rng(1405);
+      // 40 sessions per row: the dot is the session's average; in the draught the same row shows sessions with a shared push
+      const DOTS = NS.map((n, r) => D.dots[n].map((v, i) => ({ a: X(v), b: X(D.draught[n][i]), y: RY[r] + (R() - 0.5) * 22, t0: ROW_T[r] + 0.012 * i, d: 0.45, td: DRAUGHT_T + 0.25 * r + 0.006 * i, lo: v < D.true, lod: D.draught[n][i] < D.true })));
+      let P5 = null, curT = 0, ready = false;
+      function draw(p, t) {
+        p.clear(); p.noStroke();
+        DOTS.forEach((row) => row.forEach((q) => {
+          if (t < q.t0) return;
+          const u = eio(clamp((t - q.t0) / q.d)), w = eio(clamp((t - q.td) / 0.8));
+          const x = 92 + ((q.a + (q.b - q.a) * w) - 92) * u, lo = w > 0.5 ? q.lod : q.lo;
+          const c = lo ? [79, 111, 168] : [181, 83, 60];
+          if (WC) { p.fill(c[0], c[1], c[2], 55); p.circle(x, q.y, 12); p.fill(c[0], c[1], c[2], 150); p.circle(x + 0.5, q.y + 0.4, 5.4); }
+          else { p.fill(c[0], c[1], c[2], 220); p.circle(x, q.y, 7.5); }
+        }));
+      }
+      function series(s, key, vals, until, col) {
+        // points and joining strokes, one more point per cue
+        let o = "";
+        for (let i = 0; i < vals.length; i++) {
+          if (curT < until[i]) break;
+          if (i) o += '<path d="M ' + CX[i - 1] + " " + CY(vals[i - 1]).toFixed(1) + " L " + CX[i] + " " + CY(vals[i]).toFixed(1) + '" stroke="' + col + '" stroke-width="2.6" stroke-linecap="round" fill="none"/>';
+          o += PUP.memo(key + "p" + i, s, (s) => PUP.circ(CX[i], CY(vals[i]), 12, s, 20 + i, { fill: col, strokeWidth: 1.4 }));
+        }
+        return o;
+      }
+      function svgDraw(t) {
+        curT = t;
+        const s = Math.floor(t * 8) % 8, tq = Math.floor(t * 12) / 12;
+        let o = "";
+        // wind from the window (behind the dots): pale strokes drifting left
+        const wa = ramp(t, 6.8, 7.3) * (1 - ramp(t, 13.5, 14.2));
+        if (wa > 0) [[206, 0], [256, 0.35], [306, 0.7], [356, 0.2]].forEach(([y, ph], k) => {
+          const u = ((t * 0.55 + ph) % 1), x = 440 - u * 520;
+          o += '<g opacity="' + (0.75 * wa * Math.sin(u * Math.PI)).toFixed(3) + '" transform="translate(' + x.toFixed(1) + " " + y + ')">' +
+            '<path d="M 0 0 C 30 -12 60 12 90 0 C 120 -12 150 10 180 0 L 181 4 C 150 14 120 -8 90 4 C 60 16 30 -8 0 4 Z" fill="#8FAFC9"/></g>';
+        });
+        // rows: the number line and the true weight
+        o += PUP.line(86, AXY, 414, AXY, s, 1, { strokeWidth: 2.4 });
+        [499.5, 500, 500.5].forEach((v, k) => { o += PUP.line(X(v), AXY, X(v), AXY + 8, s, 2 + k, { strokeWidth: 2 }); });
+        o += '<path d="M 250 206 L 250 ' + AXY + '" stroke="#1D6B62" stroke-width="2" stroke-dasharray="6 6"/>';
+        // the window: comes in on "But", its curtains blow while the wind runs
+        const wv = ramp(t, 6.0, 6.4);
+        if (wv > 0) o += '<g opacity="' + wv + '" transform="translate(462 86) scale(0.62)">' + PUP.windowPup(s, { blow: wa * (0.75 + 0.25 * Math.sin(tq * 7)) }) + "</g>";
+        if (window.PSTYLE && PSTYLE.post) o = PSTYLE.post(o);
+        svg.innerHTML = (window.PSTYLE && PSTYLE.defs ? PSTYLE.defs : "") + o;
+        // the chart (on a layer above the card): random only (blue), the 0.25/sqrt(n) curve, with a draught (brick) and its floor
+        o = series(s, "ind", NS.map((n) => D.err[n]), ROW_T.map((x) => x + 0.2), "#3A527F");
+        const th = ramp(t, 3.45, 3.95);
+        if (th > 0) { let d = ""; for (let k = 0; k <= 40; k++) { const n = Math.pow(64, k / 40); d += (k ? " L " : "M ") + cxN(n).toFixed(1) + " " + CY(D.sigma / Math.sqrt(n)).toFixed(1); }
+          o += '<path d="' + d + '" fill="none" stroke="#3A527F" stroke-width="1.6" stroke-dasharray="5 5" opacity="' + (0.8 * th) + '"/>'; }
+        const fl = ramp(t, 14.3, 14.7);
+        if (fl > 0) o += '<path d="M 100 ' + CY(D.floor).toFixed(1) + " L " + (100 + 300 * fl).toFixed(1) + " " + CY(D.floor).toFixed(1) + '" stroke="#9C4130" stroke-width="2" stroke-dasharray="7 5"/>';
+        o += series(s, "dr", NS.map((n) => D.err_draught[n]), DPOINT_T, "#B5533C");
+        if (window.PSTYLE && PSTYLE.post) o = PSTYLE.post(o);
+        fg.innerHTML = (window.PSTYLE && PSTYLE.defs ? PSTYLE.defs : "") + o;
+      }
+      const tl = gsap.timeline({ paused: true });
+      // rows and their errors arrive on "4", "16", "64"; "÷2" on each "halves"/"again"
+      NS.forEach((n, i) => {
+        tl.fromTo("#sB2-n" + i, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.2 }, Math.max(0, ROW_T[i] - 0.05));
+        tl.fromTo("#sB2-e" + i, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.2 }, ROW_T[i] + 0.3);
+        tl.fromTo("#sB2-d" + i, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 8.9 + 0.1 * i);
+        tl.to("#sB2-e" + i, { opacity: 0, duration: 0.3 }, 8.9 + 0.1 * i);
+      });
+      HALF_T.forEach((t, i) => tl.fromTo("#sB2-h" + (i + 1), { opacity: 0, scale: 1.6 }, { opacity: 1, scale: 1, duration: 0.2, ease: "back.out(2)" }, t));
+      tl.fromTo("#sB2-rule", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 1.95);
+      tl.fromTo("#sB2-l3", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 3.55);
+      tl.fromTo("#sB2-l1", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 4.6);
+      // "But a draught" (6.0): the title changes, the halving marks go
+      tl.to(["#sB2-t1", "#sB2-s1", "#sB2-rule"], { opacity: 0, duration: 0.25 }, 6.0);
+      tl.to(["#sB2-h1", "#sB2-h2", "#sB2-h3"], { opacity: 0, duration: 0.25 }, 6.0);
+      tl.fromTo(["#sB2-t2", "#sB2-s2"], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.3 }, 6.1);
+      tl.fromTo("#sB2-l2", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 12.7);
+      // "near zero point one eight" (14.32 .. 14.64): the floor, and a ring on the 64-reading error
+      tl.fromTo("#sB2-l4", { opacity: 0 }, { opacity: 1, duration: 0.3 }, 14.5);
+      tl.fromTo("#sB2-ring", { opacity: 0, scale: 1.4 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 14.64);
+      const build = new Promise((resolve) => {
+        document.fonts.ready.then(() => {
+          P5 = new p5((p) => {
+            p.setup = () => { p.pixelDensity(window.devicePixelRatio || 1); const c = p.createCanvas(540, 620); c.parent("sB2-p5"); p.noLoop(); ready = true; resolve(); };
+            p.draw = () => { if (ready) draw(p, curT); };
+          }, document.getElementById("sB2-p5"));
+        });
+      });
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady["sB2-p5"] = build.then(() => { svgDraw(curT); P5.redraw(); });
+      const st = { t: 0 };
+      tl.fromTo(st, { t: 0 }, { t: 16.4, duration: 16.4, ease: "none", onUpdate: () => { svgDraw(st.t); if (ready) P5.redraw(); } }, 0);
+      window.__timelines["sB2"] = tl;
+    })();
+  </script>
+</template>

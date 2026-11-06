@@ -1,0 +1,32 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; pointer-events: none; }
+    .cap { position: absolute; left: 0; top: 612px; width: 540px; text-align: center; opacity: 0; visibility: hidden; overflow: visible; }
+    .cap .pill { display: inline-block; padding: 6px 16px 8px; background: #FBF3E2; border: 2px solid #5B4E46; border-radius: 16px;
+      font: 900 30px/1.15 "Inter", sans-serif; color: #1F2A44; box-shadow: 2px 4px 8px rgba(74,63,58,0.3); letter-spacing: -0.01em; }
+    .cap .w { display: inline-block; }
+  </style>
+  <div id="root" data-composition-id="captions" data-width="540" data-height="960"><div id="cap-box"></div></div>
+  <script>
+    (function () {
+      const OFF = 0, END = 34.0;       // captions from the first word (muted autoplay) to the end card, which shows its words already
+      const G = window.CAPTIONS.filter((g) => g.start >= OFF - 0.01 && g.start < END);
+      const box = document.getElementById("cap-box");
+      const tl = gsap.timeline({ paused: true });
+      G.forEach((g, i) => {
+        const d = document.createElement("div"); d.className = "cap"; d.id = "cap" + i;
+        d.innerHTML = '<span class="pill">' + g.words.map((w, k) => '<span class="w" id="cap' + i + "w" + k + '">' + w.text + "</span>").join(" ") + "</span>";
+        box.appendChild(d);
+        const a = Math.max(0, g.start - OFF - 0.04);
+        const next = i + 1 < G.length ? G[i + 1].start - OFF - 0.04 : g.end - OFF + 0.3;
+        const b = Math.max(a + 0.2, Math.min(next, g.end - OFF + 0.35));
+        tl.set(d, { visibility: "visible" }, a);
+        tl.fromTo(d, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.08, ease: "power2.out" }, a);
+        g.words.forEach((w, k) => tl.fromTo("#cap" + i + "w" + k, { color: "#1F2A44" }, { color: "#B5533C", duration: 0.05 }, Math.max(a, w.start - OFF)));
+        tl.to(d, { opacity: 0, duration: 0.06, ease: "power2.in" }, b - 0.06);
+        tl.set(d, { opacity: 0, visibility: "hidden" }, b);
+      });
+      window.__timelines["captions"] = tl;
+    })();
+  </script>
+</template>

@@ -46,10 +46,13 @@ story from the motion alone? If not, the beat needs a better visual, not more wo
 | `particles(n, ...)` | seeded clouds: noise, populations, data flowing (with `MoveAlongPath`) |
 | `push_in` / `pull_out` | camera into a region and back |
 | `spotlight(mob, others)` | dim the rest, ring the one |
+| `spring(preset)`, `spring_time(preset)` | rate function with mass: snappy, base, heavy (no overshoot), playful |
 | Manim: `TransformMatchingShapes`, `ReplacementTransform`, `FadeIn/FadeOut(target_position=...)`, `LaggedStart`, `ShowPassingFlash`, `Circumscribe`, `always_redraw` + `ValueTracker` | morphs, flights, sweeps, live-updating geometry |
 
 The worked example is `examples/how-a-network-sees/` (a ResNet-18 on CC0 photos: pixels, filters sweeping, feature maps,
 prediction bars, saliency, an adversarial change): read its `scenes/main.py` before writing a new video.
+
+House rules (banned looks, pace, phone-size text, the critique loop): [motion.md](motion.md).
 
 ## Rules of thumb
 - One point per beat, one visual per point. If a beat has no visual change, merge it or add one.

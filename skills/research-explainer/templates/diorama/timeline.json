@@ -1,0 +1,98 @@
+{
+ "total": 44.6,
+ "lang": "en",
+ "voice": false,
+ "captions": true,
+ "beats": [
+  {
+   "id": "W1",
+   "scene": "s1_reading",
+   "start": 0.5,
+   "dur": 4.459,
+   "end": 4.959,
+   "text": "This flour weighs two kilos, but our wobbly scale never quite agrees.",
+   "en": "This flour weighs two kilos, but our wobbly scale never quite agrees."
+  },
+  {
+   "id": "W2",
+   "scene": "s1_reading",
+   "start": 5.209,
+   "dur": 4.106,
+   "end": 9.315,
+   "text": "Each reading is off by a random wobble of about a quarter kilo.",
+   "en": "Each reading is off by a random wobble of about a quarter kilo."
+  },
+  {
+   "id": "A1",
+   "scene": "s2_average",
+   "start": 10.865,
+   "dur": 3.929,
+   "end": 14.794,
+   "text": "So Pip weighs it again and again, and averages the readings.",
+   "en": "So Pip weighs it again and again, and averages the readings."
+  },
+  {
+   "id": "A2",
+   "scene": "s2_average",
+   "start": 15.944,
+   "dur": 4.282,
+   "end": 20.226,
+   "text": "Four readings halve the error; sixteen halve it again: about 0.06.",
+   "en": "Four readings halve the error; sixteen halve it again: about 0.06."
+  },
+  {
+   "id": "A3",
+   "scene": "s2_average",
+   "start": 20.976,
+   "dur": 3.753,
+   "end": 24.729,
+   "text": "The error falls like one over root n: the standard error.",
+   "en": "The error falls like one over root n: the standard error."
+  },
+  {
+   "id": "C1",
+   "scene": "s3_shared",
+   "start": 27.379,
+   "dur": 4.988,
+   "end": 32.367,
+   "text": "But if a draught pushes every reading the same way, half the wobble is shared.",
+   "en": "But if a draught pushes every reading the same way, half the wobble is shared."
+  },
+  {
+   "id": "C2",
+   "scene": "s3_shared",
+   "start": 32.617,
+   "dur": 4.106,
+   "end": 36.723,
+   "text": "Then averaging stalls: even sixty-four readings stay near 0.18.",
+   "en": "Then averaging stalls: even sixty-four readings stay near 0.18."
+  },
+  {
+   "id": "E1",
+   "scene": "s4_takeaway",
+   "start": 38.773,
+   "dur": 4.224,
+   "end": 42.997,
+   "text": "Averaging removes each reading's own wobble, not the shared part.",
+   "en": "Averaging removes each reading's own wobble, not the shared part."
+  }
+ ],
+ "scenes": {
+  "s1_reading": {
+   "start": 0.5,
+   "end": 9.315
+  },
+  "s2_average": {
+   "start": 10.865,
+   "end": 24.729
+  },
+  "s3_shared": {
+   "start": 27.379,
+   "end": 36.723
+  },
+  "s4_takeaway": {
+   "start": 38.773,
+   "end": 42.997
+  }
+ }
+}

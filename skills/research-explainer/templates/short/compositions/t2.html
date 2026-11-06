@@ -1,0 +1,53 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #t2-gl { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+    .t2-img { display: none; }
+  </style>
+  <div id="root" data-composition-id="t2" data-width="540" data-height="960" data-layout-ignore>
+    <img id="t2-from" class="t2-img" src="assets/t2_from.png" alt="" />
+    <img id="t2-to" class="t2-img" src="assets/t2_to.png" alt="" />
+    <canvas id="t2-gl" width="540" height="960"></canvas>
+  </div>
+  <script>
+    (function () {
+      // GL Transitions "InkBleed" (gl-transitions.com, see window.GLT for author and licence), between still frames of s3 and s4
+      const T = window.GLT["InkBleed"], DUR = 0.55;
+      const cv = document.getElementById("t2-gl"), dpr = window.devicePixelRatio || 1;
+      cv.width = 540 * dpr; cv.height = 960 * dpr;
+      const gl = cv.getContext("webgl", { preserveDrawingBuffer: true, premultipliedAlpha: false, alpha: false });
+      const vs = "attribute vec2 p; varying vec2 vUv; void main(){ vUv = (p + 1.0) * 0.5; gl_Position = vec4(p, 0.0, 1.0); }";
+      const fs = "precision highp float; varying vec2 vUv; uniform sampler2D uFrom, uTo; uniform float progress, ratio;\n" +
+        "vec4 getFromColor(vec2 uv){ return texture2D(uFrom, uv); } vec4 getToColor(vec2 uv){ return texture2D(uTo, uv); }\n" +
+        T.glsl + "\nvoid main(){ gl_FragColor = transition(vUv); }";
+      function sh(type, src) { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; }
+      const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs)); gl.linkProgram(pr); gl.useProgram(pr);
+      const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(pr, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      // every parameter set, to its default from the catalog (unset uniforms are 0 and break most transitions)
+      Object.entries(T.defaultParams || {}).forEach(([k, v]) => {
+        const u = gl.getUniformLocation(pr, k); if (!u) return;
+        if (Array.isArray(v)) gl["uniform" + v.length + "f"](u, ...v); else gl.uniform1f(u, v);
+      });
+      gl.uniform1f(gl.getUniformLocation(pr, "ratio"), 540 / 960);
+      const uP = gl.getUniformLocation(pr, "progress");
+      let ready = false; const st = { t: 0 };
+      function tex(img, unit, name) { const t = gl.createTexture(); gl.activeTexture(gl.TEXTURE0 + unit); gl.bindTexture(gl.TEXTURE_2D, t);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        gl.uniform1i(gl.getUniformLocation(pr, name), unit); }
+      function draw() { if (!ready) return; gl.viewport(0, 0, cv.width, cv.height);
+        const x = Math.max(0, Math.min(1, st.t / DUR)); gl.uniform1f(uP, x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); }
+      const a = document.getElementById("t2-from"), b = document.getElementById("t2-to");
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady["t2-gl"] = Promise.all([a.decode(), b.decode()]).then(() => { tex(a, 0, "uFrom"); tex(b, 1, "uTo"); ready = true; draw(); });
+      const tl = gsap.timeline({ paused: true });
+      tl.fromTo(st, { t: 0 }, { t: DUR, duration: DUR, ease: "none", onUpdate: draw }, 0);
+      window.__timelines["t2"] = tl;
+    })();
+  </script>
+</template>

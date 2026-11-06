@@ -1,0 +1,33 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #bg-paper { position: absolute; inset: 0; background: url("assets/paper.jpg") center / cover; }
+    #bg-decor { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+  </style>
+  <div id="root" data-composition-id="bg" data-width="540" data-height="960" data-no-timeline data-layout-ignore>
+    <!-- paper, a faint bell curve and a wooden ruler: decoration in the bottom band where the app draws its own buttons -->
+    <div id="bg-paper"></div>
+    <svg id="bg-decor" viewBox="0 0 540 960" aria-hidden="true">
+      <path id="bg-bell" d="" fill="#1F2A44" opacity="0.06" />
+      <path id="bg-bell-line" d="" fill="none" stroke="#1F2A44" stroke-width="2" opacity="0.18" />
+      <line x1="270" y1="712" x2="270" y2="810" stroke="#2A9D8F" stroke-width="2" stroke-dasharray="5 5" opacity="0.45" />
+      <rect x="-10" y="812" width="560" height="44" rx="4" fill="#A87C52" />
+      <rect x="-10" y="850" width="560" height="6" fill="#7A5434" opacity="0.8" />
+      <g id="bg-ticks" stroke="#4A3220" stroke-width="1.5" opacity="0.75"></g>
+      <rect x="0" y="862" width="540" height="98" fill="#E6D7B8" opacity="0.55" />
+    </svg>
+  </div>
+  <script>
+    (function () {
+      // static decoration: a Gaussian outline (the shape of the noise) and the ruler's ticks, drawn once
+      let d = "M 30 810", a = "M 30 810";
+      for (let x = 30; x <= 510; x += 4) { const z = (x - 270) / 70, y = 810 - 92 * Math.exp(-0.5 * z * z); d += " L " + x + " " + y.toFixed(1); a += " L " + x + " " + y.toFixed(1); }
+      document.getElementById("bg-bell").setAttribute("d", d + " L 510 810 Z");
+      document.getElementById("bg-bell-line").setAttribute("d", a);
+      const g = document.getElementById("bg-ticks"); let s = "";
+      for (let i = 0; i * 9 < 560; i++) { const x = 6 + i * 9, h = i % 10 === 0 ? 18 : i % 5 === 0 ? 12 : 7;
+        s += '<line x1="' + x + '" y1="812" x2="' + x + '" y2="' + (812 + h) + '" />'; }
+      g.innerHTML = s;
+    })();
+  </script>
+</template>

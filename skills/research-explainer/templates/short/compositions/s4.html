@@ -1,0 +1,114 @@
+<template>
+  <style>
+    @font-face { font-family: "Caveat"; src: url("assets/fonts/Caveat.ttf"); font-weight: 400 700; }
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #1F2A44; }
+    #s4-title { position: absolute; left: 36px; top: 88px; font: 900 38px/1 "Inter", sans-serif; letter-spacing: -0.02em; }
+    #s4-stamp { position: absolute; left: 36px; top: 134px; padding: 1px 7px; border: 2px solid #1D6B62; border-radius: 4px; color: #1D6B62;
+      font: 700 14px "JetBrains Mono", monospace; background: rgba(251,250,246,0.9); }
+    #s4-panel { position: absolute; left: 24px; top: 164px; width: 492px; height: 424px; border: 2px solid #9FB3C8; border-radius: 6px;
+      background-color: #FBFAF6;
+      background-image: linear-gradient(#C9D6E3 1px, transparent 1px), linear-gradient(90deg, #C9D6E3 1px, transparent 1px);
+      background-size: 18px 18px; box-shadow: 3px 4px 0 rgba(31,42,68,0.12); }
+    #s4-svg { position: absolute; left: 0; top: 0; width: 540px; height: 600px; overflow: visible; }
+    .s4-bar { position: absolute; width: 38px; border-radius: 4px 4px 0 0; transform-origin: 50% 100%; }
+    .s4-bar.i { background: #2A9D8F; }
+    .s4-bar.c { background: #B5533C; }
+    .s4-val { position: absolute; width: 60px; text-align: center; font: 700 14px/16px "JetBrains Mono", monospace; }
+    .s4-val span, .s4-tag span { background: rgba(251,250,246,0.92); border-radius: 3px; padding: 0 2px; }
+    .s4-val.i { color: #1D6B62; }
+    .s4-val.c { color: #9C4130; }
+    .s4-tag { position: absolute; width: 50px; text-align: center; font: 900 18px/20px "Inter", sans-serif; color: #1D6B62; }
+    .s4-n { position: absolute; top: 542px; width: 60px; text-align: center; font: 900 20px/1 "Inter", sans-serif; }
+    #s4-xlab { position: absolute; left: 0; top: 567px; width: 540px; text-align: center; font: 700 14px/1 "JetBrains Mono", monospace; color: #3C4660; }
+    .s4-yl { position: absolute; left: 34px; width: 32px; text-align: right; font: 700 14px/16px "JetBrains Mono", monospace; color: #3C4660; }
+    .s4-leg { position: absolute; left: 226px; font: 700 15px/18px "Inter", sans-serif; transform-origin: 0% 50%; }
+    .s4-leg i { display: inline-block; width: 14px; height: 14px; border-radius: 3px; margin-right: 7px; vertical-align: -2px; }
+    #s4-formula { position: absolute; left: 186px; top: 228px; padding: 4px 12px 5px; background: #FFFFFF; border: 2px solid #1D6B62; border-radius: 12px;
+      font: 900 19px/1.2 "Inter", sans-serif; color: #1D6B62; box-shadow: 2px 3px 0 rgba(31,42,68,0.15); transform-origin: 50% 50%; }
+    #s4-floor-t { position: absolute; left: 449px; top: 329px; width: 62px; font: 700 24px/0.9 "Caveat", cursive; color: #9C4130; }
+    #s4-floor-t span { font: 700 14px/18px "JetBrains Mono", monospace; }
+  </style>
+  <div id="root" data-composition-id="s4" data-width="540" data-height="960">
+    <div id="s4-title">Error of the average</div>
+    <div id="s4-stamp">SIMULATED · 1,000,000 TRIALS PER BAR</div>
+    <div id="s4-panel"></div>
+    <svg id="s4-svg" viewBox="0 0 540 600" data-layout-ignore>
+      <g id="s4-grid" stroke="#9FB3C8" stroke-width="1.5" stroke-dasharray="4 5"></g>
+      <line x1="72" y1="224" x2="72" y2="536" stroke="#1F2A44" stroke-width="2" />
+      <line x1="72" y1="536" x2="500" y2="536" stroke="#1F2A44" stroke-width="2" />
+      <path id="s4-curve" d="" fill="none" stroke="#1D6B62" stroke-width="2.5" stroke-dasharray="7 5" />
+      <line id="s4-floor" x1="74" x2="504" y1="0" y2="0" stroke="#9C4130" stroke-width="2.5" stroke-dasharray="8 6" />
+    </svg>
+    <div id="s4-bars" data-layout-allow-overlap></div>
+    <div id="s4-leg-i" class="s4-leg" style="top:178px"><i style="background:#2A9D8F"></i>independent noise</div>
+    <div id="s4-leg-c" class="s4-leg" style="top:200px"><i style="background:#B5533C"></i>shared noise · correlation <span id="s4-rho"></span></div>
+    <div id="s4-formula">error = <span id="s4-sig"></span> ÷ √n</div>
+    <div id="s4-floor-t">floor<br><span id="s4-floor-v"></span></div>
+    <div id="s4-xlab">readings averaged (n)</div>
+  </div>
+  <script>
+    (function () {
+      const E = window.DATA.error, NS = E.ns, BASE = 536, K = 1200, G = [118, 213, 308, 403];
+      const y = (v) => BASE - K * v, f3 = (v) => v.toFixed(3);
+      document.getElementById("s4-rho").textContent = String(E.rho);
+      document.getElementById("s4-sig").textContent = String(window.DATA.sigma);
+      document.getElementById("s4-floor-v").textContent = f3(E.floor);
+      const fl = document.getElementById("s4-floor"); fl.setAttribute("y1", y(E.floor)); fl.setAttribute("y2", y(E.floor));
+      let grid = "";
+      [0.1, 0.2].forEach((v) => { grid += '<line x1="72" x2="500" y1="' + y(v) + '" y2="' + y(v) + '" />'; });
+      document.getElementById("s4-grid").innerHTML = grid;
+      const root = document.getElementById("s4-bars");
+      const el = (cls, css, html) => { const d = document.createElement("div"); d.className = cls; Object.assign(d.style, css); if (html != null) d.innerHTML = html; root.appendChild(d); return d; };
+      [0.1, 0.2].forEach((v) => el("s4-yl", { top: (y(v) - 8) + "px" }, v.toFixed(1)));
+      const same1 = f3(E.independent["1"]) === f3(E.correlated["1"]);   // one reading: both cases are the same thing
+      NS.forEach((n, k) => {
+        const vi = E.independent[String(n)], vc = E.correlated[String(n)], c = G[k];
+        el("s4-n", { left: (c - 30) + "px" }, String(n));
+        const bi = el("s4-bar i", { left: (c - 40) + "px", top: y(vi) + "px", height: (K * vi) + "px" }); bi.id = "s4-bi" + k;
+        const bc = el("s4-bar c", { left: (c + 2) + "px", top: y(vc) + "px", height: (K * vc) + "px" }); bc.id = "s4-bc" + k;
+        const li = el("s4-val i", { left: (c - 51) + "px", top: (y(vi) - 19) + "px" }, "<span>" + f3(vi) + "</span>"); li.id = "s4-li" + k;
+        if (!(k === 0 && same1)) { const lc = el("s4-val c", { left: (c - 9) + "px", top: (y(vc) - 19) + "px" }, "<span>" + f3(vc) + "</span>"); lc.id = "s4-lc" + k; }
+        if (k > 0) { const tg = el("s4-tag", { left: (c - 46) + "px", top: (y(vi) - 44) + "px" }, "<span>÷" + Math.round(Math.sqrt(n)) + "</span>"); tg.id = "s4-tg" + k; }
+      });
+      // theory 0.25/sqrt(n) through the tops of the independent bars (x: one group per factor of 4)
+      let d = "";
+      for (let s = 0; s <= 60; s++) { const n = Math.pow(64, s / 60), x = G[0] - 21 + 95 * Math.log(n) / Math.log(4);
+        d += (s ? " L " : "M ") + x.toFixed(1) + " " + y(window.DATA.sigma / Math.sqrt(n)).toFixed(1); }
+      const cv = document.getElementById("s4-curve"); cv.setAttribute("d", d); const cl = cv.getTotalLength();
+
+      const tl = gsap.timeline({ paused: true });
+      // hidden until their beat (the n=1 bar is there from the first frame): immediate sets, outside the timeline
+      gsap.set(["#s4-bc0", "#s4-bc1", "#s4-bc2", "#s4-bc3", "#s4-bi1", "#s4-bi2", "#s4-bi3"], { scaleY: 0 });
+      gsap.set(["#s4-li1", "#s4-li2", "#s4-li3", "#s4-lc1", "#s4-lc2", "#s4-lc3", "#s4-tg1", "#s4-tg2", "#s4-tg3",
+              "#s4-leg-i", "#s4-leg-c", "#s4-formula", "#s4-floor-t"], { opacity: 0 });
+      gsap.set(fl, { opacity: 0 });
+      gsap.set(cv, { strokeDasharray: cl + " " + cl, strokeDashoffset: cl });
+      // "Four readings: half the error. Sixteen: a quarter. Sixty-four: an eighth." (18.40-22.64 s)
+      [[1, 0.45, 1.09], [2, 2.05, 2.77], [3, 3.33, 4.29]].forEach(([k, grow, tag]) => {
+        tl.fromTo("#s4-bi" + k, { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, grow);
+        tl.fromTo("#s4-li" + k, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.2 }, grow + 0.35);
+        tl.fromTo("#s4-tg" + k, { opacity: 0, scale: 1.8 }, { opacity: 1, scale: 1, duration: 0.2, ease: "power3.in" }, tag);
+      });
+      tl.to(cv, { strokeDashoffset: 0, duration: 0.6, ease: "power2.inOut" }, 4.45);
+      tl.fromTo("#s4-formula", { opacity: 0, scale: 0.7 }, { opacity: 1, scale: 1, duration: 0.25, ease: "back.out(2)" }, 4.55);
+      // "But only if the noise is independent." (independent: 24.56 s)
+      tl.fromTo("#s4-leg-i", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.25 }, 5.0);
+      tl.fromTo("#s4-leg-i", { scale: 1 }, { scale: 1.12, duration: 0.15, yoyo: true, repeat: 1 }, 6.21);
+      // "If readings share half their noise" (share: 26.16 s), "the error stalls" (27.44-27.92 s)
+      tl.fromTo("#s4-leg-c", { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.25 }, 7.8);
+      if (same1) tl.to("#s4-li0", { x: 21, color: "#3C4660", duration: 0.3, ease: "power2.inOut" }, 9.05);
+      [0, 1, 2, 3].forEach((k) => {
+        tl.fromTo("#s4-bc" + k, { scaleY: 0 }, { scaleY: 1, duration: 0.4, ease: "power3.out" }, 9.05 + 0.12 * k);
+        if (k > 0) tl.fromTo("#s4-lc" + k, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.2 }, 9.4 + 0.12 * k);
+      });
+      // "near 0.18" (28.40 s): the floor no average gets under
+      tl.fromTo(fl, { opacity: 0 }, { opacity: 1, duration: 0.3 }, 10.0);
+      tl.fromTo("#s4-floor-t", { opacity: 0, x: -8 }, { opacity: 1, x: 0, duration: 0.25 }, 10.1);
+      // "even with sixty-four" (30.08 s)
+      tl.fromTo("#s4-bc3", { scaleX: 1 }, { scaleX: 1.2, duration: 0.15, yoyo: true, repeat: 1 }, 11.7);
+      tl.fromTo("#s4-lc3", { scale: 1 }, { scale: 1.3, duration: 0.15, yoyo: true, repeat: 1 }, 11.7);
+      tl.to({}, { duration: 0.01 }, 12.59);   // the timeline spans the whole scene
+      window.__timelines["s4"] = tl;
+    })();
+  </script>
+</template>

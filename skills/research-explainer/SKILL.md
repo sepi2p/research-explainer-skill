@@ -18,6 +18,10 @@ points, and the camera moves to what matters. Words are labels. Voice and subtit
 not burned into the video unless the user asks (`"captions": "burn"`); an `.srt` file is always written. Plan every beat by
 what moves before deciding what is said.
 
+**House rules and the critique loop.** Most of a video's quality comes from the setup around the model, not the request:
+banned generic looks, a reference to copy, springs, a beat grid, and scoring your own frames until every score is 8+.
+Read [references/motion.md](references/motion.md) before planning any video; it applies to explainers and launch videos.
+
 Bundled companions (install.sh puts them next to this skill): `manim-composer` (scene planning), `manimce-best-practices`
 (Manim CE code), `manimgl-best-practices` (only if the user wants ManimGL). Read them when planning and coding scenes.
 
@@ -62,6 +66,9 @@ follow-ups: [references/intake.md](references/intake.md).
    Subtitles as a separate .srt (default) or burned into the video.
 7. **Status of the work.** Which results are final, which are preliminary or planned; anything unpublished that must not
    appear; anything that must appear (a caveat, a funder, a co-author).
+8. **Reference (optional).** A video or frame whose look they like (their earlier video, a channel, a launch film). We copy
+   its grammar (pacing, type, palette, transitions), never its content: `rx.py reference <video>`, then
+   `docs/style_guide.md` (see references/motion.md).
 
 Write the answers into `project.json` (`source_type`, `audience`, `languages`, `voice.mode`, ...).
 
@@ -116,7 +123,9 @@ Use the `manim-composer` method: hook question, narrative arc, one point per bea
 (the transformation the eye follows: "the 64 filters pop in; three lift out; one sweeps the photo while its map paints"),
 then the words. Our patterns and the motion vocabulary are in [references/scene-patterns.md](references/scene-patterns.md).
 For each scene list: purpose, beats (motion, then words), which claims (ids) and assets it uses. A beat without a
-transformation is not a beat. **Show scenes.md to the user and wait for approval before coding.**
+transformation is not a beat. Follow the house rules in [references/motion.md](references/motion.md): the hook in the first
+2 s, something new every 2-4 s, no centred-title-on-gradient or fade-only shots, key words big enough for a phone; with a
+reference, write in the style of `docs/style_guide.md`. **Show scenes.md to the user and wait for approval before coding.**
 
 ## 6. Write narration and scenes
 
@@ -126,7 +135,8 @@ transformation is not a beat. **Show scenes.md to the user and wait for approval
   see [references/persian.md](references/persian.md).
 - `scenes/*.py`: one class per scene, `class S03Chart(Beat): SCENE_ID = "s03_chart"`, then `self.beat(i, fn)` for every beat
   in order. Read numbers with `data()`; never type a measured number into scene code. Use the motion vocabulary
-(`fan`, `gather`, `collapse_to`, `ticker`, `dot_plot`, `particles`, `push_in`, `spotlight`) and Manim's transforms. Use `T()` for all text, `tag()` for
+(`fan`, `gather`, `collapse_to`, `ticker`, `dot_plot`, `particles`, `push_in`, `spotlight`) and Manim's transforms, with
+  spring timing for moves that should feel physical (`rate_func=spring("snappy")`, `run_time=spring_time("snappy")`). Use `T()` for all text, `tag()` for
   status, `source_note()` for the source line, `framed()/img()` for real images, `amplified()` for invisible differences.
   The library is `scripts/explainer/base.py`; read it once.
 - Register every scene in `project.json` -> `scenes` (`id`, `file`, `class`), in playing order.
@@ -149,13 +159,17 @@ voices in [references/voice.md](references/voice.md).
 
 ## 8. Check before delivering
 
-1. Look at every contact sheet in `build/qc/<lang>_<mode>/` (open the PNGs): overlaps, cut-off text, wrong direction in
-   Persian, empty frames, unreadable labels. Fix and re-render the affected scenes only (`--scenes id ...`).
+1. Critique loop (references/motion.md): look at every contact sheet in `build/qc/<lang>_<mode>/` and at
+   `rx.py sheets build/<video>.mp4` (whole video, phone size, strips around fast moves). Score hook, phone readability,
+   motion, variety, composition, accuracy, sound 1-10 in `docs/review_log.md`; fix the 3 worst (overlaps, cut-off or tiny
+   text, wrong direction in Persian, empty frames, dead beats), re-render the affected scenes only (`--scenes id ...`), and
+   repeat until every score is 8+.
 2. Voiced: any clip whose transcript differed from its text is listed by `rx.py durations`; listen or regenerate it
    (`--only scene:i`).
 3. Accuracy pass: re-read the narration against the ledger, one claim at a time. If you can, give the narration, the ledger
    and the sources to a separate reviewer agent and ask it to find claims that overstate, drop a caveat, or mislabel status.
-4. Report to the user: length, size, languages, voice, what was checked, anything you could not verify.
+4. Report to the user: length, size, languages, voice, the final review scores, what was checked, anything you could not
+   verify, and what you would improve next.
 
 ## 9. Slides (optional)
 
@@ -166,10 +180,48 @@ environment offers one, otherwise `templates/deck.html` (a single HTML file, rig
 ## 10. Launch video (optional)
 
 A 15-25 s promo with kinetic type, real footage from the explainer, music and sound effects, for social posts or a README.
-`rx.py promo [dir]` renders `<dir>/index.html` frame by frame in headless Chromium and mixes `<dir>/promo.json` (music file +
-offset, sound-effect cues from `assets/sfx/`). Start from `templates/promo/`; read [references/promo.md](references/promo.md).
-Same accuracy rules: every number and screen on it is real (from claims.json, assets/, or real command output). Music is the
-user's choice of a track they may use; never put a track of unknown licence into a shared repo.
+`rx.py promo [dir]` renders `<dir>/index.html` frame by frame in headless Chromium and mixes `<dir>/promo.json` (music +
+sound-effect cues from `assets/sfx/`), then makes review sheets. Start from `templates/promo/`; read
+[references/promo.md](references/promo.md) and the beat-grid section of [references/motion.md](references/motion.md): write
+the state list on the beat grid and show it before code; springs for motion; `--format vertical|square` for other shapes.
+Same accuracy rules: every number and screen on it is real (from claims.json, assets/, or real command output). Music: the
+user's track that they may use (measure it: `rx.py beats`), or original music synthesized in code
+(`"music": {"synth": {"bpm": 120}}`, no licence question). Never put a track of unknown licence into a shared repo.
+
+## 11. Paper-diorama style (optional)
+
+A second, fixed look: a hand-drawn cut-paper diorama with a puppet, crisp graph-paper slips that carry only real data,
+sticky notes stamped with their real names and a ladder of ideas, rendered from an HTML/SVG page by Playwright (example:
+a 45 s demo on averaging noisy measurements at a baker's bench). When the user asks for the paper-diorama style or for
+"the same style as" a video made with it, do not use Manim or re-run style research: read
+[references/style-diorama.md](references/style-diorama.md) and start from `templates/diorama/`.
+
+## 12. Vertical short (optional)
+
+A 30-60 s 9:16 short for YouTube Shorts or LinkedIn, often cut from an explainer: HyperFrames compositions at
+540x960 (final render 1080x1920), PixiJS/p5.js canvases on a GSAP timeline, GL Transitions between snapshot stills, a
+checked voice, captions timed by Parakeet, an original CC0 sampled score. Read [references/shorts.md](references/shorts.md)
+and start from `templates/short/` (a complete 35.5 s example; `./setup.sh` fetches its libraries). Same accuracy rules:
+every number on screen comes from a recorded run or a seeded script, and the screen says which.
+
+## 13. Watercolor story short (optional)
+
+A vertical short that tells a small story with characters before it explains (example: in a made-up bakery the scale
+shows a new number every time; the baker says "weigh it 16 times and average", which leads into why averaging works),
+in a painted watercolor look:
+an image model paints the empty set and a paper wash once, the engine animates painted puppets in front of it. When the
+user asks for the watercolor style, a story or dramatization short, or "the same style as" a video made with it, read
+[references/style-watercolor.md](references/style-watercolor.md) and start from `templates/watercolor-story/`
+(`./setup.sh`; looks: watercolor, cut-out, ink). Made-up stories are labelled as dramatizations on screen.
+
+### Templates (steps 11-13): what applies
+
+The diorama, short and watercolor templates replace the Manim project pipeline: no `rx.py new/claims/assets/build`. What
+still applies: the intake questions the request does not already answer (step 1; if nobody can answer, e.g. an automated
+run, pick sensible defaults, write them at the top of a short plan and go on), a plan of beats (scenes.md or the
+template's own plan file) shown before coding when the user is there, the accuracy rules (the data script asserts every
+number it shows; the screen says recorded, simulated or made up), the motion review loop (references/motion.md), drafts
+first, and the final export only after the user approves the draft.
 
 ## When the skill cannot do something
 
@@ -182,4 +234,7 @@ issue to the maintainers. Never open the issue without their OK.
 
 - Ask when the science is unclear; decide yourself on layout, colours and pacing.
 - Preview at low quality, final at 720p; render scenes in parallel (rx.py does) and re-render only what changed.
+- Gates: plan -> stills -> low-quality full pass -> critique -> final render -> sound. Fix pacing before polishing.
+- Use a high reasoning effort for a new video, a normal one for small fixes. If scenes are coded by parallel subagents,
+  write `docs/animation_guide.md` first so they all code in one style.
 - Never print secrets. Never publish or upload anything without the user's explicit request.

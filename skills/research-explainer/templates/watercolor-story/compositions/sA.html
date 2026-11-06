@@ -1,0 +1,151 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; font: 400 16px "Inter", sans-serif; color: #1F2A44; overflow: hidden; }
+    #sA-stage { position: absolute; left: 0; top: 0; width: 540px; height: 960px; transform-origin: 0 0; }
+    #sA-room { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+    #sA-svg { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+    #sA-tex { position: absolute; left: 0; top: 0; width: 540px; height: 960px; mix-blend-mode: multiply; opacity: 0.18; pointer-events: none; }
+    #sA-vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 45%, rgba(0,0,0,0) 55%, rgba(90,60,30,0.28) 100%); pointer-events: none; }
+    #sA-dim { position: absolute; inset: 0; background: #F3E9D2; opacity: 0; pointer-events: none; }
+    #sA-kick { position: absolute; left: 22px; top: 88px; padding: 3px 9px; border-radius: 6px; background: rgba(251,243,226,0.92); border: 2px solid #1D6B62;
+      font: 700 14px "JetBrains Mono", monospace; letter-spacing: 0.06em; color: #1D6B62; }
+    .bub { position: absolute; background: #FFFDF8; border: none; border-radius: 22px; padding: 11px 17px 12px;
+      font: 800 23px/1.2 "Inter", sans-serif; box-shadow: 2px 4px 7px rgba(58,42,26,0.38); transform-origin: 50% 100%; }
+    .tail { filter: drop-shadow(2px 4px 3px rgba(58,42,26,0.3)); }
+    .bub .w { display: inline-block; }
+    .tail { position: absolute; overflow: visible; }
+    #sA-b1 { left: 24px; top: 140px; width: 300px; }
+    #sA-b2 { left: 24px; top: 140px; width: 300px; }
+    /* the notepad (close-up): the apprentice's sixteen readings and their average */
+    #sA-card { position: absolute; left: 66px; top: 150px; width: 408px; height: 336px; border-radius: 12px; background: #FFFDF8;
+      box-shadow: 4px 8px 16px rgba(74,63,58,0.35); padding: 18px 22px 0; transform-origin: 50% 50%; }
+    #sA-card-h { font: 800 19px "Inter", sans-serif; }
+    #sA-card-h span { font: 400 15px "Inter", sans-serif; color: #3C4660; }
+    #sA-grid { position: relative; height: 140px; margin-top: 12px; }
+    .sA-r { position: absolute; width: 88px; font: 700 22px "JetBrains Mono", monospace; color: #1F2A44; text-align: left; }
+    .sA-r.lo { color: #3A527F; } .sA-r.hi { color: #9C4130; }
+    #sA-rule { height: 2px; background: #1F2A44; opacity: 0.25; margin: 6px 0 10px; }
+    #sA-avg { display: flex; align-items: baseline; gap: 14px; }
+    #sA-avg-l { font: 700 19px "Inter", sans-serif; color: #3C4660; }
+    #sA-avg-v { font: 900 40px "Inter", sans-serif; padding: 0 6px; border-radius: 6px; }
+    #sA-avg-n { font: 700 24px/1 var(--hand); color: #3A527F; transform: rotate(-4deg); }
+  </style>
+  <div id="root" data-composition-id="sA" data-width="540" data-height="960" data-layout-allow-overflow>
+    <div id="sA-stage" data-layout-ignore><img id="sA-room" src="assets/bg_set.jpg" alt="" /><svg id="sA-svg" viewBox="0 0 540 960"></svg></div>
+    <img id="sA-tex" src="assets/paper.jpg" alt="" data-layout-ignore />
+    <div id="sA-vig" data-layout-ignore></div>
+    <div id="sA-dim" data-layout-ignore></div>
+    <div id="sA-kick">DRAMATIZATION · MADE-UP BAKERY</div>
+    <div class="bub" id="sA-b1"><span id="sA-b1-t"></span>
+      <svg class="tail" style="left:70px;top:100%;width:50px;height:60px" viewBox="0 0 50 60" data-layout-ignore><path d="M 2 -3 L 30 54 L 30 -3 Z" fill="#FFFDF8"/></svg></div>
+    <div class="bub" id="sA-b2"><span id="sA-b2-t"></span>
+      <svg class="tail" style="left:236px;top:100%;width:110px;height:80px" viewBox="0 0 110 80" data-layout-ignore><path d="M 2 -3 L 104 72 L 44 -3 Z" fill="#FFFDF8"/></svg></div>
+    <div id="sA-card" data-layout-allow-overflow>
+      <div id="sA-card-h">One bag of flour <span>· 16 readings (g)</span></div>
+      <div id="sA-grid"></div>
+      <div id="sA-rule"></div>
+      <div id="sA-avg"><div id="sA-avg-l">average</div><div id="sA-avg-v"></div><div id="sA-avg-n">sum ÷ 16</div></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const D = window.DATA, M = window.MOUTH, W = window.WORDS, PUP = window.PUP;
+      const PS = window.PSTYLE || {}, ROOM = !!PS.room;          // a painted set (assets/styles/*.js) or the drawn one
+      if (ROOM) document.getElementById("sA-room").src = PS.room; else document.getElementById("sA-room").style.display = "none";
+      document.getElementById("sA-tex").style.opacity = PS.tex != null ? PS.tex : 0.42;
+      // the empty set for the painter: no people (render returns early), no bubbles, no tag, no notepad
+      if (PS.empty) document.querySelectorAll(".bub, #sA-kick, #sA-card").forEach((e) => { e.style.display = "none"; });
+      const svg = document.getElementById("sA-svg"), stage = document.getElementById("sA-stage");
+      const clamp = (x) => Math.max(0, Math.min(1, x)), ramp = (t, a, b) => clamp((t - a) / (b - a));
+      const ease = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      const mix = (a, b, u) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+      // ---------- bubbles with karaoke words (timed from the narrator's word times) ----------
+      function words(el, line, from, text) {
+        const ws = W.filter((w) => w.line === line); const i0 = ws.findIndex((w) => w.text.toLowerCase().replace(/[^a-z']/g, "") === from);
+        const shown = text.split(" ");
+        el.innerHTML = shown.map((s, k) => '<span class="w" data-t="' + (ws[i0 + k] ? ws[i0 + k].start : 99) + '">' + s + "</span>").join(" ");
+        return Array.from(el.querySelectorAll(".w"));
+      }
+      const kw1 = words(document.getElementById("sA-b1-t"), "N1", "why", "Why does the scale show a new number every time?");
+      const kw2 = words(document.getElementById("sA-b2-t"), "N2", "weigh", "Weigh it 16 times, and take the average.");
+      // ---------- the notepad: the 16 readings of work/make_data.py ----------
+      const grid = document.getElementById("sA-grid");
+      D.story.forEach((r, i) => { const d = document.createElement("div"); d.className = "sA-r" + (r < D.true ? " lo" : r > D.true ? " hi" : ""); d.id = "sA-r" + i;
+        d.textContent = r.toFixed(1); d.style.left = (i % 4) * 92 + "px"; d.style.top = Math.floor(i / 4) * 34 + "px"; grid.appendChild(d); });
+      document.getElementById("sA-avg-v").textContent = D.avg_shown + " g";
+      // ---------- the weighing: lift the bag off the scale, put it back, the display hunts and settles on the next reading ----------
+      const CYC = [[1.2, 1.85], [2.5, 3.15], [3.8, 4.45]];      // [lift, land] while the narrator says N1
+      const FAST0 = 10.7, FASTD = 0.11;                          // N3: twelve quick weighings (readings 5..16) behind the notepad
+      const LANDS = CYC.map((c) => c[1]).concat(Array.from({ length: 12 }, (_, i) => FAST0 + (i + 1) * FASTD));
+      const SHOWN = LANDS.map((l) => l + 0.05);                  // when each reading is written on the notepad
+      function scaleAt(t) {
+        let lift = 0, off = false;
+        for (const [a, b] of CYC) if (t >= a && t < b) { lift = 34 * (ease(ramp(t, a, a + 0.22)) - ease(ramp(t, b - 0.22, b))); off = t >= a + 0.06; }
+        if (t >= FAST0 && t < FAST0 + 12 * FASTD) { const u = ((t - FAST0) / FASTD) % 1; lift = 12 * Math.sin(u * Math.PI); off = u > 0.2 && u < 0.8; }
+        let k = 0; LANDS.forEach((l, i) => { if (t >= l) k = i + 1; });
+        const since = k ? t - LANDS[k - 1] : 9;
+        if (off) return { lift, txt: "0.0", settled: true };
+        if (since < 0.3) return { lift, txt: (D.story[k] + 0.1 * Math.round(2.4 * Math.sin(Math.floor(t * 15) * 2.7))).toFixed(1), settled: false };
+        return { lift, txt: D.story[k].toFixed(1), settled: true };
+      }
+      // ---------- the stage, redrawn each frame (boil 8/s, characters on twos) ----------
+      const mf = (who, t) => { const a = M[who]; const f = Math.floor(t * M.fps); return f >= 0 && f < a.length ? a[f] : 0; };
+      const blink = (t, off, per) => ((t + off) % per) < 0.13;
+      function jit(t, k) { let a = (Math.floor(t * 12) * 7919 + k * 104729) | 0; a = Math.imul(a ^ (a >>> 15), 2246822507); a ^= a >>> 13; return ((a >>> 0) % 1000) / 1000 - 0.5; }
+      // the camera is a pure function of scene time (a GSAP tween on it would lag the redraw by one seek)
+      const CAMK = [[0, 1, 0, 0], [0.6, 1, 0, 0], [1.6, 1.12, -30, -60], [5.7, 1.12, -30, -60], [6.4, 1.2, -108, -100], [10.35, 1.2, -108, -100],
+        [10.85, 1, 0, 0], [99, 1, 0, 0]];
+      function camAt(t) { let i = 0; while (i < CAMK.length - 2 && t >= CAMK[i + 1][0]) i++; const a = CAMK[i], b = CAMK[i + 1], u = ease(ramp(t, a[0], b[0]));
+        return { s: a[1] + (b[1] - a[1]) * u, x: a[2] + (b[2] - a[2]) * u, y: a[3] + (b[3] - a[3]) * u }; }
+      const AX = 120, AY = 410, BX = 420, BY = 392, SX = 262, SY = 552;   // the apprentice, the baker (neck bases) and the scale (foot)
+      function render(t) {
+        const s = Math.floor(t * 8) % 8, tq = Math.floor(t * 12) / 12;
+        if (PS.empty) { svg.innerHTML = PUP.kitchenBack(s) + PUP.clockHands(t); return; }   // reference for paint_room.py
+        const sc = scaleAt(tq);
+        const bagY = SY - 62 - sc.lift, grip = [SX - 30 - AX, bagY - 94 - AY];   // the apprentice's hand on the bag's folded top
+        // apprentice: holds the bag while weighing, scratches his head on "every time?", turns to the baker, smiles at the average
+        const hold = (1 - ramp(tq, 4.55, 4.8)) + ramp(tq, 10.45, 10.65) * (1 - ramp(tq, 12.0, 12.25));
+        const scratch = ramp(tq, 4.6, 4.85) * (1 - ramp(tq, 5.75, 6.0)), toBaker = ramp(tq, 5.8, 6.1) * (1 - ramp(tq, 10.4, 10.6));
+        const app = { head: -4 + 9 * toBaker - 5 * scratch + jit(t, 1), lookX: -1 + 4.5 * toBaker, lookY: 3 * (1 - toBaker) * (1 - scratch), mouth: mf("APP", t),
+          blink: blink(t, 0.5, 3.4), worry: tq > 3.0 && tq < 6.2, brow: 3 * scratch, smile: ramp(tq, 9.9, 10.2), happy: tq > 12.1,
+          handR: mix([66, 136], grip, clamp(hold)), handL: mix([-44, 136], [-27 + 3 * Math.sin(tq * 26), -92], scratch) };
+        // baker: watches the scale, laughs, raises a finger for the advice, nods at the average
+        const laugh = tq > 6.15 && tq < 7.2, point = ramp(tq, 7.2, 7.45) * (1 - ramp(tq, 9.9, 10.2));
+        const bak = { head: 4 - 5 * ramp(tq, 5.8, 6.1) + (laugh ? -6 : 0) + jit(t, 2) + 3 * Math.sin(tq * 9) * ramp(tq, 12.1, 12.3), lookX: -3, lookY: 3 * (1 - ramp(tq, 5.6, 5.9)),
+          mouth: mf("BAK", t), blink: blink(t, 1.9, 4.1), happy: laugh, laugh: laugh ? 1 : 0, bob: laugh ? -3 * Math.abs(Math.sin(tq * 11)) : 0,
+          smile: 0.4 + 0.6 * ramp(tq, 10.0, 10.3), point, handL: mix([-64, 146], [-104, -54], ease(point)) };
+        let o = ROOM ? "" : PUP.kitchenBack(s) + PUP.clockHands(t);
+        o += '<g transform="translate(' + BX + " " + BY + ") rotate(" + (0.5 * jit(t, 4)) + ')">' + PUP.baker(s, bak) + "</g>";
+        o += '<g transform="translate(' + AX + " " + AY + ") rotate(" + (0.5 * jit(t, 5)) + ')">' + PUP.apprentice(s, app) + "</g>";
+        o += PUP.kitchenFront(s) + '<g transform="translate(' + SX + " " + SY + ')">' + PUP.scale(s) + PUP.scaleDisplay(sc.txt, sc.settled) + "</g>";
+        o += '<g transform="translate(' + SX + " " + bagY + ')">' + PUP.bag(s) + "</g>";
+        if (hold > 0.98) o += '<g transform="translate(' + (AX + grip[0]) + " " + (AY + grip[1]) + ')">' + PUP.memo("grip", s, (s) => PUP.circ(0, 0, 18, s, 3, { fill: PUP.C.skinA })) + "</g>";
+        if (window.PSTYLE && PSTYLE.post) o = PSTYLE.post(o);
+        svg.innerHTML = (window.PSTYLE && PSTYLE.defs ? PSTYLE.defs : "") + o;
+        const cam = camAt(t);
+        stage.style.transform = "translate(" + cam.x + "px," + cam.y + "px) scale(" + cam.s + ")";
+        // karaoke in the bubbles
+        kw1.concat(kw2).forEach((w) => { w.style.color = t >= +w.dataset.t ? "#B5533C" : "#1F2A44"; });
+        // the notepad: each reading appears as it is weighed; the average on "five hundred point zero"
+        D.story.forEach((r, i) => { document.getElementById("sA-r" + i).style.opacity = t >= (i < 4 ? 0 : SHOWN[i - 1]) ? 1 : 0; });
+        document.getElementById("sA-avg-v").style.background = t >= 12.08 ? "rgba(233,162,59,0.55)" : "transparent";
+      }
+      const tl = gsap.timeline({ paused: true });
+      // bubbles: the apprentice's question is up from frame 0 (thumbnail)
+      tl.fromTo("#sA-b1", { scale: 0.96 }, { scale: 1, duration: 0.3, ease: "back.out(2)" }, 0);
+      tl.to("#sA-b1", { opacity: 0, scale: 0.9, duration: 0.18 }, 5.78);
+      tl.fromTo("#sA-b2", { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.22, ease: "back.out(2.4)" }, 7.12);
+      tl.to("#sA-b2", { opacity: 0, duration: 0.15 }, 10.4);
+      // the notepad comes up to the camera from the apron pocket ("Sixteen readings later", 10.56)
+      tl.fromTo("#sA-card", { opacity: 0, x: -234, y: 186, scale: 0.08, rotation: -6 }, { opacity: 1, x: 0, y: 0, scale: 1, rotation: -1.5, duration: 0.5, ease: "power3.inOut" }, 10.45);
+      tl.fromTo("#sA-dim", { opacity: 0 }, { opacity: 0.55, duration: 0.5 }, 10.45);
+      tl.fromTo(["#sA-avg-l", "#sA-avg-v", "#sA-avg-n"], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.2, stagger: 0.08 }, 12.0);
+      tl.fromTo("#sA-avg-v", { scale: 1 }, { scale: 1.12, duration: 0.16, yoyo: true, repeat: 1, transformOrigin: "50% 60%" }, 12.08);
+      const st = { t: 0 };
+      tl.fromTo(st, { t: 0 }, { t: 14.25, duration: 14.25, ease: "none", onUpdate: () => render(st.t) }, 0);
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady["sA"] = document.fonts.ready.then(() => render(st.t));
+      window.__timelines["sA"] = tl;
+    })();
+  </script>
+</template>

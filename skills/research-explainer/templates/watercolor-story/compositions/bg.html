@@ -1,0 +1,32 @@
+<template>
+  <style>
+    #root { position: absolute; inset: 0; }
+    #bg-paper { position: absolute; inset: 0; background: url("assets/paper.jpg") center / cover; }
+    html[data-look="watercolor"] #bg-paper, html[data-look="cutout"] #bg-paper { background-image: url("assets/bg_wash.jpg"); }
+    html[data-look="watercolor"] .bg-dec { filter: url(#wcB); opacity: 0.92; }
+    #bg-decor { position: absolute; left: 0; top: 0; width: 540px; height: 960px; }
+  </style>
+  <div id="root" data-composition-id="bg" data-width="540" data-height="960" data-no-timeline data-layout-ignore>
+    <!-- paper and a bakery counter: decoration in the bottom band where the app draws its own buttons -->
+    <div id="bg-paper"></div>
+        <svg id="bg-decor" viewBox="0 0 540 960" aria-hidden="true"><defs><filter id="wcB" x="-12%" y="-12%" width="124%" height="124%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7" result="n1"/><feDisplacementMap in="SourceGraphic" in2="n1" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="2.4" result="bl"/><feColorMatrix in="d" type="matrix" values="0 0 0 1 0  0 0 0 1 0  0 0 0 1 0  0 0 0 1 0" result="da"/><feColorMatrix in="bl" type="matrix" values="0 0 0 1 0  0 0 0 1 0  0 0 0 1 0  0 0 0 1 0" result="ba"/><feComposite in="da" in2="ba" operator="arithmetic" k1="0" k2="1" k3="-1" k4="0" result="E"/><feComposite in="d" in2="E" operator="arithmetic" k1="0" k2="1" k3="-0.6" k4="0" result="rim"/><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="2" seed="3" result="g"/><feColorMatrix in="g" type="matrix" values="0 0 0 0 0.36  0 0 0 0 0.29  0 0 0 0 0.24  0 0 0 0.34 -0.1" result="g2"/><feComposite in="g2" in2="rim" operator="in" result="g3"/><feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="21" result="w"/><feColorMatrix in="w" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 0.97  0 0 0 0.5 -0.18" result="w2"/><feComposite in="w2" in2="rim" operator="in" result="w3"/><feMerge><feMergeNode in="rim"/><feMergeNode in="w3"/><feMergeNode in="g3"/></feMerge></filter></defs><g class="bg-dec">
+          <rect x="0" y="842" width="540" height="14" fill="#A87C52" />
+          <rect x="0" y="856" width="540" height="6" fill="#7A5434" opacity="0.8" />
+          <rect x="0" y="862" width="540" height="98" fill="#E6D7B8" opacity="0.55" />
+          <g id="bg-counter">
+            <!-- a loaf on a board -->
+            <rect x="30" y="832" width="132" height="10" rx="3" fill="#D2A877" stroke="#7A5434" stroke-width="2" />
+            <ellipse cx="96" cy="812" rx="56" ry="22" fill="#C98A4B" stroke="#7A5434" stroke-width="2" />
+            <path d="M70 806 L 80 818 M 90 800 L 100 814 M 110 802 L 120 814" stroke="#7A5434" stroke-width="2.4" stroke-linecap="round" />
+            <!-- a jar of whisks and spoons -->
+            <rect x="226" y="800" width="40" height="42" rx="6" fill="#8FAFC9" />
+            <path d="M236 800 L 230 760 M 246 800 L 248 754 M 256 800 L 264 762" stroke="#7A5434" stroke-width="4" stroke-linecap="round" />
+            <ellipse cx="248" cy="750" rx="7" ry="11" fill="none" stroke="#5B4E46" stroke-width="2.4" />
+            <!-- a small bag of flour -->
+            <path d="M400 842 L 398 790 L 404 780 L 448 780 L 454 790 L 452 842 Z" fill="#E8D3A9" stroke="#7A5434" stroke-width="2" />
+            <path d="M404 780 L 408 772 L 444 772 L 448 780 Z" fill="#D6B987" stroke="#7A5434" stroke-width="2" />
+            <ellipse cx="478" cy="838" rx="22" ry="5" fill="#FBF6EC" opacity="0.9" />
+          </g>
+        </g></svg>
+  </div>
+</template>

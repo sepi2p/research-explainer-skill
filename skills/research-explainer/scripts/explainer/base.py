@@ -322,6 +322,35 @@ def spotlight(mob, others, dim=0.75, color=ACCENT):
     return AnimationGroup(*[o.animate.fade(dim) for o in others], Circumscribe(mob, color=color, buff=0.08))
 
 
+def spring(preset="base"):
+    """Rate function with mass: accelerates, overshoots a hair, settles (closed-form damped spring, deterministic).
+    Presets: "snappy" (UI, leading edges), "base" (cards, camera), "heavy" (big type, logo: no overshoot),
+    "playful" (stickers: visible overshoot), or (stiffness, damping). Use run_time close to spring_time(preset):
+    self.play(card.animate.shift(UP), rate_func=spring("snappy"), run_time=spring_time("snappy"))."""
+    k, d = SPRINGS[preset] if isinstance(preset, str) else preset
+    w0 = np.sqrt(k); z = d / (2 * w0); T = spring_time((k, d))
+
+    def s(t):
+        if t <= 0:
+            return 0.0
+        if z < 1:
+            wd = w0 * np.sqrt(1 - z * z)
+            return 1 - np.exp(-z * w0 * t) * (np.cos(wd * t) + z * w0 / wd * np.sin(wd * t))
+        return 1 - np.exp(-w0 * t) * (1 + w0 * t)
+    end = s(T)
+    return lambda x: float(s(x * T) + x * (1 - end))   # exactly 1 at the end
+
+
+SPRINGS = {"snappy": (400, 34), "base": (170, 22), "heavy": (120, 24), "playful": (200, 12)}
+
+
+def spring_time(preset="base"):
+    """Seconds until the spring has settled to 0.1 %: its natural run_time."""
+    k, d = SPRINGS[preset] if isinstance(preset, str) else preset
+    w0 = np.sqrt(k); z = d / (2 * w0)
+    return float(np.log(1000) / (z * w0) if z < 1 else 9.2 / w0)
+
+
 # ---------- the beat-synced scene ----------
 _DUR = None
 

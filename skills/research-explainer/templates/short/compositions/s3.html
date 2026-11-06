@@ -1,0 +1,147 @@
+<template>
+  <style>
+    @font-face { font-family: "Caveat"; src: url("assets/fonts/Caveat.ttf"); font-weight: 400 700; }
+    #root { position: absolute; inset: 0; font-family: "Inter", sans-serif; color: #1F2A44; }
+    #s3-title { position: absolute; left: 36px; top: 88px; font: 900 44px/1 "Inter", sans-serif; letter-spacing: -0.02em; }
+    #s3-title b { color: #B5533C; }
+    #s3-panel { position: absolute; left: 24px; top: 160px; width: 492px; height: 424px; border: 2px solid #9FB3C8; border-radius: 6px;
+      background-color: #FBFAF6;
+      background-image: linear-gradient(#C9D6E3 1px, transparent 1px), linear-gradient(90deg, #C9D6E3 1px, transparent 1px);
+      background-size: 18px 18px; box-shadow: 3px 4px 0 rgba(31,42,68,0.12); }
+    #s3-panel-head { position: absolute; left: 14px; top: 9px; font: 700 14px "JetBrains Mono", monospace; color: #3C4660; }
+    #s3-stamp { position: absolute; right: 10px; top: 6px; padding: 1px 7px; border: 2px solid #1D6B62; border-radius: 4px; color: #1D6B62;
+      font: 700 14px "JetBrains Mono", monospace; background: rgba(251,250,246,0.9); }
+    #s3-p5 { position: absolute; left: 0; top: 0; width: 540px; height: 600px; }
+  </style>
+  <div id="root" data-composition-id="s3" data-width="540" data-height="960">
+    <div id="s3-title"><b>Average</b> them</div>
+    <div id="s3-panel">
+      <div id="s3-panel-head">one dot per reading</div>
+      <div id="s3-stamp">SIMULATED · SEED 0</div>
+    </div>
+    <div id="s3-p5" data-layout-ignore></div>
+  </div>
+  <script>
+    (function () {
+      const D = window.DATA, R = D.readings, MEAN = D.mean, TRUE = D.true, W = D.worst;
+      const tl = gsap.timeline({ paused: true });
+
+      // ---- p5.js: cards -> ink particles -> dots on a number line -> their average (canvas 540x600 at the top) ----
+      const AX = 500, XL = 44, XR = 496, V0 = 0.3, V1 = 1.5;
+      const xv = (v) => XL + (v - V0) / (V1 - V0) * (XR - XL);
+      function rng(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+      const rnd = rng(7);
+      // dot plot: each reading at its exact value, stacked where dots would touch
+      const lvl = new Array(R.length).fill(0), placed = [];
+      R.map((v, i) => [v, i]).sort((a, b) => a[0] - b[0]).forEach(([v, i]) => {
+        let L = 0; while (placed.some((q) => q.L === L && Math.abs(xv(q.v) - xv(v)) < 15)) L++;
+        lvl[i] = L; placed.push({ v, L });
+      });
+      const dots = R.map((v, i) => ({ x: xv(v), y: AX - 10 - lvl[i] * 15 }));
+      const cards = R.map((v, i) => ({ x: 90 + (i % 5) * 90, y: 218 + Math.floor(i / 5) * 46, r: (rnd() - 0.5) * 0.08, burst: 0.5 + i * 0.04 }));
+      const N = 36, parts = [];
+      R.forEach((v, i) => { for (let j = 0; j < N; j++) {
+        const a = rnd() * Math.PI * 2, rr = Math.sqrt(rnd()) * 3.5;
+        parts.push({ i, sx: cards[i].x + (rnd() - 0.5) * 70, sy: cards[i].y + (rnd() - 0.5) * 26,
+          cx: (rnd() - 0.5) * 160, cy: (rnd() - 0.5) * 120, ex: dots[i].x + Math.cos(a) * rr, ey: dots[i].y + Math.sin(a) * rr,
+          t0: cards[i].burst + rnd() * 0.2, d: 0.75 + rnd() * 0.45, s: 1.4 + rnd() * 1.5 }); } });
+      const COL = 2.04, MX = xv(MEAN);                  // "cancel" (12.24 s): the dots run together into their average
+      const clamp = (x) => Math.max(0, Math.min(1, x));
+      const eio = (x) => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+      const eout = (x) => 1 - Math.pow(1 - x, 3);
+      function bez(q, u) { const v = 1 - u;
+        return [v * v * q.sx + 2 * v * u * ((q.sx + q.ex) / 2 + q.cx) + u * u * q.ex, v * v * q.sy + 2 * v * u * ((q.sy + q.ey) / 2 + q.cy) + u * u * q.ey]; }
+      function bracket(p, x1, x2, y, u, col) {      // a bracket drawn from x1 to x2, u in 0..1
+        if (u <= 0) return; const xe = x1 + (x2 - x1) * u;
+        p.stroke(col); p.strokeWeight(2.5); p.noFill(); p.line(x1, y - 7, x1, y + 7); p.line(x1, y, xe, y); if (u >= 1) p.line(x2, y - 7, x2, y + 7); p.noStroke();
+      }
+      let P5 = null, curT = 0, ready = false;
+      function render(p, t) {
+        p.clear();
+        // number line
+        const axA = clamp((t - 0.3) / 0.3);
+        if (axA > 0) {
+          p.stroke(31, 42, 68, 220 * axA); p.strokeWeight(2); p.line(XL, AX, XR, AX);
+          for (let k = 0; k <= 12; k++) { const x = xv(V0 + k * 0.1), big = k === 2 || k === 7 || k === 12; p.strokeWeight(big ? 2 : 1.2); p.line(x, AX, x, AX + (big ? 9 : 5)); }
+          p.noStroke(); p.fill(60, 70, 96, 255 * axA); p.textFont("JetBrains Mono"); p.textStyle(p.BOLD); p.textSize(14); p.textAlign(p.CENTER, p.TOP);
+          p.text("0.5", xv(0.5), AX + 12); p.text("1.5", xv(1.5) - 6, AX + 12);
+        }
+        // true value line ("noise", 11.36 s)
+        const trA = clamp((t - 1.12) / 0.3);
+        if (trA > 0) {
+          const x = xv(TRUE); p.stroke(29, 107, 98, 255 * trA); p.strokeWeight(2); p.drawingContext.setLineDash([6, 5]);
+          p.line(x, AX, x, AX - (AX - 300) * eout(trA)); p.drawingContext.setLineDash([]); p.noStroke();
+          p.fill(29, 107, 98, 255 * trA); p.textFont("JetBrains Mono"); p.textStyle(p.BOLD); p.textSize(14); p.textAlign(p.CENTER, p.BOTTOM);
+          p.text("true value " + TRUE.toFixed(2), x, 294);
+        }
+        // the 20 cards, each dissolving when its particles leave
+        cards.forEach((c, i) => {
+          const a = 1 - clamp((t - c.burst) / 0.3); if (a <= 0) return;
+          p.push(); p.translate(c.x, c.y); p.rotate(c.r);
+          p.fill(31, 42, 68, 40 * a); p.noStroke(); p.rect(-38, -16, 80, 36, 7);
+          p.fill(255, 255, 255, 255 * a); p.stroke(31, 42, 68, 255 * a); p.strokeWeight(1.8); p.rect(-40, -18, 80, 36, 7);
+          p.noStroke(); p.fill(31, 42, 68, 255 * a); p.textFont("Inter"); p.textStyle(p.BOLD); p.textSize(19); p.textAlign(p.CENTER, p.CENTER);
+          p.text(R[i].toFixed(2), 0, 1); p.pop();
+        });
+        // ink particles with short trails
+        p.noStroke();
+        parts.forEach((q) => {
+          if (t < q.t0) return;
+          const fade = 1 - clamp((t - (q.t0 + q.d) - 0.15) / 0.35); if (fade <= 0) return;
+          for (let k = 2; k >= 0; k--) { const [x, y] = bez(q, eio(clamp((t - k * 0.025 - q.t0) / q.d))); p.fill(31, 42, 68, (k === 0 ? 210 : 60) * fade); p.circle(x, y, q.s * (k === 0 ? 1 : 0.7)); }
+        });
+        // settled dots; after the collapse they stay as faint ghosts
+        const ghost = 1 - 0.6 * clamp((t - COL - 0.3) / 0.4);
+        dots.forEach((d, i) => {
+          const a = clamp((t - (cards[i].burst + 0.85)) / 0.3); if (a <= 0) return;
+          const worst = i === W.index, hl = worst ? clamp((t - 2.68) / 0.25) : 0;
+          p.fill(hl > 0 ? p.color(181, 83, 60, 255 * a) : p.color(31, 42, 68, 255 * a * ghost)); p.circle(d.x, d.y, 13);
+          if (hl > 0) { const pu = 1 + 0.5 * Math.sin(clamp((t - 2.68) / 0.6) * Math.PI); p.noFill(); p.stroke(200, 55, 45, 255 * hl); p.strokeWeight(2.5);
+            p.circle(d.x, d.y, 22 * pu); p.noStroke(); }
+        });
+        // the collapse: a copy of every dot runs to the average, where the marker appears
+        if (t >= COL) dots.forEach((d, i) => {
+          const u = eio(clamp((t - COL - i * 0.012) / 0.55)); if (u >= 1) return;
+          const x = d.x + (MX - d.x) * u, y = d.y + (AX + 12 - d.y) * u - Math.sin(u * Math.PI) * 40;
+          p.fill(181, 83, 60, 230); p.circle(x, y, 11 - 4 * u);
+        });
+        const mA = clamp((t - COL - 0.5) / 0.2);
+        if (mA > 0) {
+          const pu = 1 + 0.35 * Math.sin(clamp((t - 5.96) / 0.5) * Math.PI);   // "Their average" (16.16 s)
+          p.push(); p.translate(MX, AX + 3); p.scale(pu * (0.6 + 0.4 * eout(mA))); p.fill(181, 83, 60); p.noStroke(); p.triangle(0, 0, -10, 18, 10, 18); p.pop();
+          p.fill(156, 65, 48, 255 * mA); p.textFont("Inter"); p.textStyle(p.BOLD); p.textSize(16); p.textAlign(p.CENTER, p.TOP);
+          p.text("average " + MEAN.toFixed(2), MX - 8, AX + 26);
+          // the sum, from the readings themselves
+          const fA = clamp((t - COL - 0.7) / 0.3);
+          p.fill(60, 70, 96, 255 * fA); p.textFont("JetBrains Mono"); p.textSize(14); p.textAlign(p.CENTER, p.CENTER);
+          p.text("(" + R[0].toFixed(2) + " + " + R[1].toFixed(2) + " + … + " + R[R.length - 1].toFixed(2) + ") / " + R.length + " = " + MEAN.toFixed(2), 270, 236);
+        }
+        // "Single readings miss by as much as 0.58" (14.80 s): bracket from the worst reading to the true value
+        const wx = dots[W.index].x;
+        bracket(p, wx, xv(TRUE), 420, eio(clamp((t - 4.15) / 0.4)), p.color(181, 83, 60));
+        const wl = clamp((t - 4.55) / 0.2);
+        if (wl > 0) { p.fill(156, 65, 48, 255 * wl); p.textFont("Inter"); p.textStyle(p.BOLD); p.textSize(17); p.textAlign(p.CENTER, p.BOTTOM);
+          p.text("misses by " + W.miss.toFixed(2), (wx + xv(TRUE)) / 2, 410); }
+        // "Their average misses by 0.05" (17.28 s): bracket under the axis
+        bracket(p, MX, xv(TRUE), 562, eio(clamp((t - 6.6) / 0.3)), p.color(181, 83, 60));
+        const ml = clamp((t - 7.05) / 0.2);
+        if (ml > 0) { p.fill(156, 65, 48, 255 * ml); p.textFont("Inter"); p.textStyle(p.BOLD); p.textSize(17); p.textAlign(p.LEFT, p.CENTER);
+          p.text("misses by " + D.mean_miss.toFixed(2), xv(TRUE) + 10, 562); }
+      }
+      const build = new Promise((resolve) => {
+        document.fonts.ready.then(() => {
+          P5 = new p5((p) => {
+            p.setup = () => { p.pixelDensity(window.devicePixelRatio || 1); const c = p.createCanvas(540, 600); c.parent("s3-p5"); p.noLoop(); ready = true; resolve(); };
+            p.draw = () => { if (ready) render(p, curT); };
+          }, document.getElementById("s3-p5"));
+        });
+      });
+      window.__hf = window.__hf || {}; window.__hf.buildReady = window.__hf.buildReady || {};
+      window.__hf.buildReady["s3-p5"] = build.then(() => P5.redraw());
+      const st = { t: 0 };
+      tl.fromTo(st, { t: 0 }, { t: 8.15, duration: 8.15, ease: "none", onUpdate: () => { curT = st.t; if (ready) P5.redraw(); } }, 0);
+      window.__timelines["s3"] = tl;
+    })();
+  </script>
+</template>
